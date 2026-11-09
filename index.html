@@ -1659,9 +1659,9 @@ CREATE POLICY "Public Access mutasi_bmd" ON public.mutasi_bmd FOR ALL USING (tru
        ======================================================================== -->
   <script type="module">
     // KONFIGURASI APLIKASI
-    const IS_PREVIEW = true; // Ubah menjadi false SAAT DEPLOY agar mode preview & data dummy hilang dan terhubung 100% ke Supabase
-    const SUPABASE_URL = "URL_SUPABASE_ANDA";
-    const SUPABASE_ANON_KEY = "ANON_KEY_ANDA";
+    const IS_PREVIEW = false; // Ubah menjadi false SAAT DEPLOY agar mode preview & data dummy hilang dan terhubung 100% ke Supabase
+    const SUPABASE_URL = "https://wmrjwscrdsllydmiqcep.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indtcmp3c2NyZHNsbHlkbWlxY2VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMzgxNTQsImV4cCI6MjEwODYxNDE1NH0.xyrXXcM272fTkzFRQ2qHBPPSOOKO1PaakIqAuiw-ekw";
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
     // Inisialisasi klien Supabase hanya ketika IS_PREVIEW = false
