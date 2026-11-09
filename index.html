@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SIMBMD 3D — Sistem Inventarisasi Barang Milik Daerah</title>
+  <title>SIMBMD DIKPORA 3D — Sistem Inventarisasi BMD Dikpora & Sekolah</title>
   <meta name="theme-color" content="#0F172A" />
-  <meta name="description" content="Sistem Informasi & Inventarisasi Barang Milik Daerah (BMD) Berbasis 3D Tactile Dashboard & Supabase" />
+  <meta name="description" content="Sistem Informasi & Inventarisasi Barang Milik Daerah (BMD) Khusus Dinas Pendidikan, Pemuda dan Olahraga & Satuan Pendidikan (Sekolah)" />
 
   <!-- PWA Single-File Inline Manifest -->
-  <link rel="manifest" href='data:application/manifest+json,{"name":"SIMBMD 3D - Sistem Inventarisasi BMD","short_name":"SIMBMD 3D","start_url":".","display":"standalone","background_color":"#F4F6FB","theme_color":"#0F172A","icons":[{"src":"https://placehold.co/192x192/4F46E5/FFFFFF?text=BMD","sizes":"192x192","type":"image/png"},{"src":"https://placehold.co/512x512/4F46E5/FFFFFF?text=SIMBMD","sizes":"512x512","type":"image/png"}]}' />
+  <link rel="manifest" href='data:application/manifest+json,{"name":"SIMBMD DIKPORA 3D - Inventarisasi BMD Sekolah & Dikpora","short_name":"SIMBMD DIKPORA","start_url":".","display":"standalone","background_color":"#F4F6FB","theme_color":"#0F172A","icons":[{"src":"https://placehold.co/192x192/4F46E5/FFFFFF?text=DIKPORA","sizes":"192x192","type":"image/png"},{"src":"https://placehold.co/512x512/4F46E5/FFFFFF?text=SIMBMD","sizes":"512x512","type":"image/png"}]}' />
 
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,6 +23,9 @@
 
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- SheetJS (XLSX) CDN untuk Import & Export File Excel Acuan Kode Barang -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <script>
     tailwind.config = {
@@ -313,20 +316,20 @@
     <div id="preview-banner" class="hidden bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white px-4 py-1.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2 shadow-md z-50">
       <div class="flex items-center gap-2">
         <span class="px-2 py-0.5 bg-black/25 rounded-full uppercase tracking-wider text-[10px]">Mode Preview Aktif</span>
-        <span>Data berjalan di memori lokal (Maks 2 baris dummy). Ubah <code class="bg-black/20 px-1.5 py-0.5 rounded">IS_PREVIEW = false</code> saat deploy untuk koneksi penuh ke Supabase.</span>
+        <span>SIMBMD DIKPORA berjalan di memori lokal. Ubah <code class="bg-black/20 px-1.5 py-0.5 rounded">IS_PREVIEW = false</code> saat deploy untuk koneksi 100% ke Supabase.</span>
       </div>
       <div class="flex items-center gap-2">
         <button onclick="window.app.quickLogin('admin')" class="bg-white text-slate-900 hover:bg-slate-100 px-2.5 py-1 rounded-lg text-[11px] font-extrabold shadow-sm transition">
-          ⚡ Quick Admin BPKAD
+          ⚡ Quick Login: Admin Dinas Dikpora
         </button>
-        <button onclick="window.app.quickLogin('petugas')" class="bg-slate-900 text-white hover:bg-slate-800 px-2.5 py-1 rounded-lg text-[11px] font-extrabold shadow-sm transition">
-          ⚡ Quick Pengurus Barang OPD
+        <button onclick="window.app.quickLogin('sekolah')" class="bg-slate-900 text-white hover:bg-slate-800 px-2.5 py-1 rounded-lg text-[11px] font-extrabold shadow-sm transition">
+          ⚡ Quick Login: Operator Sekolah (SDN/SMPN)
         </button>
       </div>
     </div>
 
     <!-- ======================================================================
-         HALAMAN LOGIN 3D (HYBRID AUTHENTICATION)
+         HALAMAN LOGIN 3D (HYBRID AUTH: ADMIN DIKPORA & LOGIN SEKOLAH)
          ====================================================================== -->
     <div id="auth-screen" class="flex-1 flex items-center justify-center p-4 overflow-y-auto bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative">
       <!-- Dekorasi 3D Orbs Latar -->
@@ -337,64 +340,64 @@
         <!-- Brand Header 3D -->
         <div class="flex items-center gap-3.5 mb-6">
           <div class="icon-box-3d icon-3d-purple w-14 h-14 rounded-2xl">
-            <i data-lucide="boxes" class="w-8 h-8 text-white"></i>
+            <i data-lucide="graduation-cap" class="w-8 h-8 text-white"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">SIMBMD 3D</h1>
-              <span class="badge-3d bg-indigo-100 text-indigo-700">v2026</span>
+              <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">SIMBMD DIKPORA</h1>
+              <span class="badge-3d bg-indigo-100 text-indigo-700">3D v2026</span>
             </div>
-            <p class="text-xs font-semibold text-slate-500">Plan. Track. Verify. — Inventarisasi Aset Daerah</p>
+            <p class="text-xs font-semibold text-slate-500">Dinas Pendidikan, Pemuda & Olahraga + Satuan Pendidikan</p>
           </div>
         </div>
 
         <!-- Tab Switcher Hybrid Login -->
         <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl mb-6 border border-slate-200 shadow-inner">
-          <button id="tab-login-petugas" onclick="window.app.switchAuthTab('petugas')" class="py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5">
-            <i data-lucide="user-check" class="w-4 h-4"></i>
-            Petugas / OPD
+          <button id="tab-login-sekolah" onclick="window.app.switchAuthTab('sekolah')" class="py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5">
+            <i data-lucide="school" class="w-4 h-4"></i>
+            Login Sekolah / Unit
           </button>
           <button id="tab-login-admin" onclick="window.app.switchAuthTab('admin')" class="py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
             <i data-lucide="shield-check" class="w-4 h-4"></i>
-            Admin BPKAD
+            Admin Dinas Dikpora
           </button>
         </div>
 
-        <!-- Form Login Petugas OPD (Database Table `petugas_bmd`) -->
-        <form id="form-login-petugas" onsubmit="window.app.handleLoginPetugas(event)" class="space-y-4">
+        <!-- Form Login Satuan Pendidikan / Sekolah (Database Table `satuan_pendidikan`) -->
+        <form id="form-login-sekolah" onsubmit="window.app.handleLoginSekolah(event)" class="space-y-4">
           <div class="p-3 rounded-xl bg-indigo-50/80 border border-indigo-100 text-xs text-indigo-900 font-medium">
-            Masuk sebagai <strong>Pengurus Barang OPD / Tim Sensus</strong> menggunakan NIP/Username yang terdaftar di tabel <code class="font-bold">petugas_bmd</code>.
+            Masuk sebagai <strong>Operator Aset Sekolah / Kepala Sekolah / Pengurus Barang</strong> menggunakan <strong>NPSN / Username</strong> yang terdaftar di Dinas Dikpora.
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">NIP / Username Petugas</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">NPSN / Username Sekolah</label>
             <div class="relative">
-              <i data-lucide="id-card" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="text" id="login-petugas-nip" required placeholder="Contoh: 199001012020121001" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+              <i data-lucide="school" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="text" id="login-sekolah-npsn" required placeholder="Contoh: 40200123 (NPSN Sekolah)" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kata Sandi</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kata Sandi Sekolah</label>
             <div class="relative">
               <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="password" id="login-petugas-pass" required placeholder="••••••••" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+              <input type="password" id="login-sekolah-pass" required placeholder="••••••••" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
             </div>
           </div>
-          <button type="submit" id="btn-submit-petugas" class="btn-3d-coral w-full py-3 text-sm flex items-center justify-center gap-2">
+          <button type="submit" class="btn-3d-coral w-full py-3 text-sm flex items-center justify-center gap-2">
             <i data-lucide="log-in" class="w-4 h-4"></i>
-            <span>Masuk Dashboard OPD</span>
+            <span>Masuk Portal Aset Sekolah</span>
           </button>
         </form>
 
-        <!-- Form Login Admin BPKAD (Supabase Auth) -->
+        <!-- Form Login Admin Dinas Dikpora (Supabase Auth) -->
         <form id="form-login-admin" onsubmit="window.app.handleLoginAdmin(event)" class="space-y-4 hidden">
           <div class="p-3 rounded-xl bg-emerald-50/80 border border-emerald-100 text-xs text-emerald-900 font-medium">
-            Masuk sebagai <strong>Administrator Utama BPKAD</strong> menggunakan kredensial resmi <strong>Supabase Auth</strong>.
+            Masuk sebagai <strong>Admin Dinas Pendidikan, Pemuda & Olahraga (Bidang Aset / Pembinaan SD-SMP)</strong> via <strong>Supabase Auth</strong>.
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Admin BPKAD</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Admin Dikpora</label>
             <div class="relative">
               <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
-              <input type="email" id="login-admin-email" required placeholder="admin@bpkad.go.id" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+              <input type="email" id="login-admin-email" required placeholder="aset@dikpora.go.id" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
             </div>
           </div>
           <div>
@@ -404,9 +407,9 @@
               <input type="password" id="login-admin-pass" required placeholder="••••••••" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
             </div>
           </div>
-          <button type="submit" id="btn-submit-admin" class="btn-3d-primary w-full py-3 text-sm flex items-center justify-center gap-2">
+          <button type="submit" class="btn-3d-primary w-full py-3 text-sm flex items-center justify-center gap-2">
             <i data-lucide="shield" class="w-4 h-4"></i>
-            <span>Masuk sebagai Admin BPKAD</span>
+            <span>Masuk sebagai Admin Dinas Dikpora</span>
           </button>
         </form>
 
@@ -416,11 +419,11 @@
           <div class="grid grid-cols-2 gap-2.5">
             <button type="button" onclick="window.app.quickLogin('admin')" class="btn-3d-white py-2 px-3 text-xs flex items-center justify-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-              Demo Admin BPKAD
+              Demo Admin Dikpora
             </button>
-            <button type="button" onclick="window.app.quickLogin('petugas')" class="btn-3d-white py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+            <button type="button" onclick="window.app.quickLogin('sekolah')" class="btn-3d-white py-2 px-3 text-xs flex items-center justify-center gap-1.5">
               <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-              Demo Petugas OPD
+              Demo Login Sekolah
             </button>
           </div>
         </div>
@@ -439,12 +442,12 @@
           <div class="flex items-center gap-3 mb-7 px-1">
             <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-500 to-amber-400 p-0.5 shadow-lg shadow-rose-500/30">
               <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
-                <i data-lucide="cuboid" class="w-6 h-6 text-rose-400"></i>
+                <i data-lucide="graduation-cap" class="w-6 h-6 text-rose-400"></i>
               </div>
             </div>
             <div>
-              <h2 class="text-white font-extrabold text-lg leading-none tracking-tight">SIMBMD <span class="text-rose-400">3D</span></h2>
-              <p class="text-[11px] text-slate-400 font-medium mt-1">Plan. Track. Verify.</p>
+              <h2 class="text-white font-extrabold text-base leading-none tracking-tight">SIMBMD <span class="text-rose-400">DIKPORA</span></h2>
+              <p class="text-[11px] text-slate-400 font-medium mt-1">Aset Dinas & Sekolah 3D</p>
             </div>
           </div>
 
@@ -456,9 +459,9 @@
             </button>
           </div>
 
-          <!-- Category: MANAJEMEN ASET BMD -->
+          <!-- Category: INVENTARISASI BMD DIKPORA & SEKOLAH -->
           <div class="mb-6">
-            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Manajemen Aset BMD</p>
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Inventarisasi BMD</p>
             <nav class="space-y-1.5">
               <button onclick="window.app.navigate('kib')" data-nav="kib" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
                 <span class="flex items-center gap-3">
@@ -466,6 +469,14 @@
                   <span>Data Master Aset (KIB)</span>
                 </span>
                 <span id="sidebar-count-aset" class="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-slate-300">0</span>
+              </button>
+
+              <button onclick="window.app.navigate('kamus')" data-nav="kamus" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                  <span>Kamus Kode Barang (Excel)</span>
+                </span>
+                <span id="sidebar-count-kamus" class="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300">0</span>
               </button>
 
               <button onclick="window.app.navigate('sensus')" data-nav="sensus" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
@@ -479,63 +490,67 @@
               <button onclick="window.app.navigate('mutasi')" data-nav="mutasi" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
                 <span class="flex items-center gap-3">
                   <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
-                  <span>Mutasi & Penghapusan</span>
+                  <span>Mutasi & Usul Hapus</span>
                 </span>
                 <span id="sidebar-count-mutasi" class="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-slate-300">0</span>
               </button>
             </nav>
           </div>
 
-          <!-- Category: KARTU INVENTARIS (FILTER CEPAT KIB) -->
+          <!-- Category: PINTASAN KIB SEKOLAH & DIKPORA -->
           <div class="mb-6">
-            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Pintasan Kategori KIB</p>
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Pintasan KIB Sekolah</p>
             <div class="space-y-1">
               <button onclick="window.app.openKibCategory('KIB A - Tanah')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
                 <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                <span>KIB A — Tanah</span>
+                <span>KIB A — Tanah Sekolah/GOR</span>
               </button>
               <button onclick="window.app.openKibCategory('KIB B - Peralatan & Mesin')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
                 <span class="w-2 h-2 rounded-full bg-blue-400"></span>
-                <span>KIB B — Peralatan & Mesin</span>
+                <span>KIB B — Mobiler, TIK & Olahraga</span>
               </button>
               <button onclick="window.app.openKibCategory('KIB C - Gedung & Bangunan')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
                 <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span>KIB C — Gedung & Bangunan</span>
+                <span>KIB C — Ruang Kelas & Lab</span>
               </button>
-              <button onclick="window.app.openKibCategory('KIB D - Jalan, Irigasi & Jaringan')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
+              <button onclick="window.app.openKibCategory('KIB E - Aset Tetap Lainnya')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
                 <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span>KIB D — Jalan & Irigasi</span>
+                <span>KIB E — Buku BOS & Alat Musik</span>
               </button>
             </div>
           </div>
 
-          <!-- Category: PENGATURAN & OTORITAS (ADMIN ONLY) -->
+          <!-- Category: PENGATURAN DINAS DIKPORA (ADMIN ONLY) -->
           <div id="sidebar-admin-group" class="mb-4">
-            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Pengaturan & Otoritas</p>
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Otoritas Dinas Dikpora</p>
             <nav class="space-y-1.5">
-              <button onclick="window.app.navigate('opd')" data-nav="opd" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
-                <i data-lucide="building-2" class="w-4 h-4"></i>
-                <span>Master OPD & Petugas</span>
+              <button onclick="window.app.navigate('sekolah')" data-nav="sekolah" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <i data-lucide="school" class="w-4 h-4"></i>
+                <span>Data Sekolah & Akun NPSN</span>
+              </button>
+              <button onclick="window.app.openModalSql()" class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i>
+                <span>SQL Supabase & Deploy</span>
               </button>
             </nav>
           </div>
         </div>
 
-        <!-- Bottom 3D Promo / Sensus Action Box (Sesuai Referensi TaskHive) -->
+        <!-- Bottom 3D Promo / Quick Import Acuan Box -->
         <div class="p-4">
           <div class="rounded-2xl p-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 border border-indigo-500/30 shadow-xl relative overflow-hidden">
             <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-fuchsia-500/20 rounded-full blur-xl pointer-events-none"></div>
             <div class="flex items-start justify-between gap-2 mb-2">
               <div>
-                <h4 class="text-xs font-extrabold text-white">Sensus BMD 2026</h4>
-                <p class="text-[11px] text-indigo-200 mt-0.5 leading-snug">Pastikan seluruh aset OPD terverifikasi fisik & berlabel QR.</p>
+                <h4 class="text-xs font-extrabold text-white">Acuan Excel Kode BMD</h4>
+                <p class="text-[11px] text-indigo-200 mt-0.5 leading-snug">Pilih Nama Barang acuan, Kode Barang otomatis terisi.</p>
               </div>
               <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 flex-shrink-0">
-                <i data-lucide="rocket" class="w-5 h-5"></i>
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
               </div>
             </div>
-            <button onclick="window.app.openModalSensus()" class="mt-2 w-full py-2 px-3 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-fuchsia-500 to-indigo-500 hover:from-fuchsia-400 hover:to-indigo-400 shadow-lg shadow-fuchsia-500/30 border-b-2 border-indigo-900 flex items-center justify-center gap-1.5 transition">
-              <span>Input Cek Fisik</span>
+            <button onclick="window.app.openModalAset()" class="mt-2 w-full py-2 px-3 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-fuchsia-500 to-indigo-500 hover:from-fuchsia-400 hover:to-indigo-400 shadow-lg shadow-fuchsia-500/30 border-b-2 border-indigo-900 flex items-center justify-center gap-1.5 transition">
+              <span>+ Input Aset Sekolah</span>
               <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
             </button>
           </div>
@@ -555,19 +570,25 @@
 
             <div class="input-3d-recessed flex items-center gap-2.5 px-3.5 py-2 rounded-full w-full max-w-md">
               <i data-lucide="search" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
-              <input id="global-search-input" oninput="window.app.handleGlobalSearch(this.value)" type="text" placeholder="Cari aset BMD, kode barang, merk, atau OPD..." class="bg-transparent border-none outline-none text-xs sm:text-sm font-medium text-slate-700 w-full placeholder:text-slate-400" />
+              <input id="global-search-input" oninput="window.app.handleGlobalSearch(this.value)" type="text" placeholder="Cari kode barang, nama barang, jenis barang, atau sekolah..." class="bg-transparent border-none outline-none text-xs sm:text-sm font-medium text-slate-700 w-full placeholder:text-slate-400" />
               <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold text-slate-400 bg-white rounded-md border border-slate-200 shadow-sm">⌘K</span>
             </div>
           </div>
 
           <!-- Right: Date Filter, Notification 3D Bell & User Profile -->
           <div class="flex items-center gap-2.5 sm:gap-3.5">
+            <!-- Indikator Unit Aktif -->
+            <div id="active-unit-pill" class="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-extrabold">
+              <i data-lucide="school" class="w-3.5 h-3.5 text-indigo-600"></i>
+              <span id="active-unit-label">Semua Satuan Pendidikan</span>
+            </div>
+
             <!-- Tahun Anggaran / Periode Selector -->
             <div class="hidden md:flex items-center gap-2 btn-3d-white px-3.5 py-2 text-xs font-bold text-slate-700">
               <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
               <select id="filter-tahun-global" onchange="window.app.renderAll()" class="bg-transparent outline-none cursor-pointer font-bold text-slate-700">
                 <option value="ALL">Semua Tahun Perolehan</option>
-                <option value="2026">TA 2026 ( berjalan )</option>
+                <option value="2026">TA 2026 (Berjalan)</option>
                 <option value="2025">TA 2025</option>
                 <option value="2024">TA 2024</option>
                 <option value="2023">TA 2023 & Sebelumnya</option>
@@ -575,7 +596,7 @@
             </div>
 
             <!-- Notification Button with 3D Red Count Badge -->
-            <button onclick="window.app.navigate('mutasi')" class="btn-3d-white w-10 h-10 flex items-center justify-center relative" title="Usulan Mutasi & Notifikasi">
+            <button onclick="window.app.navigate('mutasi')" class="btn-3d-white w-10 h-10 flex items-center justify-center relative" title="Usulan Mutasi & Penghapusan Sekolah">
               <i data-lucide="bell" class="w-4 h-4 text-slate-700"></i>
               <span id="notif-badge-count" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-white shadow">0</span>
             </button>
@@ -583,13 +604,13 @@
             <!-- User Profile & Logout Pill -->
             <div class="flex items-center gap-2.5 pl-2 border-l border-slate-200">
               <div id="user-avatar-box" class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 text-white font-extrabold text-xs flex items-center justify-center shadow-md border-2 border-white">
-                AD
+                DK
               </div>
               <div class="hidden sm:block text-left leading-tight">
-                <p id="user-display-name" class="text-xs font-extrabold text-slate-900">Alex Morgan</p>
-                <p id="user-display-role" class="text-[11px] font-semibold text-slate-500">Admin BPKAD</p>
+                <p id="user-display-name" class="text-xs font-extrabold text-slate-900">Admin Dikpora</p>
+                <p id="user-display-role" class="text-[11px] font-semibold text-slate-500">Dinas Dikpora</p>
               </div>
-              <button onclick="window.app.handleLogout()" class="btn-3d-white px-2.5 py-2 text-xs text-rose-600 hover:bg-rose-50 ml-1" title="Keluar / Logout">
+              <button onclick="window.app.handleLogout()" class="btn-3d-white px-2.5 py-2 text-xs text-rose-600 hover:bg-rose-50 ml-1" title="Keluar / Ganti Akun Sekolah">
                 <i data-lucide="log-out" class="w-4 h-4"></i>
               </button>
             </div>
@@ -600,23 +621,27 @@
         <main id="page-viewport" class="flex-1 overflow-y-auto p-4 sm:p-6 pb-28 lg:pb-8 space-y-6">
           
           <!-- ================================================================
-               VIEW 1: DASHBOARD EKSEKUTIF (TASKHIVE 3D LAYOUT)
+               VIEW 1: DASHBOARD EKSEKUTIF DIKPORA & SEKOLAH (TASKHIVE 3D)
                ================================================================ -->
           <section id="view-dashboard" class="space-y-6">
             <!-- Row 1: Hero Greeting & Primary 3D Action Buttons -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h1 id="hero-greeting" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                  Selamat Pagi, Pengelola BMD! 👋
+                  Selamat Pagi, Admin Dikpora! 👋
                 </h1>
                 <p id="hero-subtitle" class="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-                  Pantau nilai perolehan, kondisi fisik KIB, dan ketertiban inventarisasi Barang Milik Daerah secara real-time.
+                  Monitoring Inventaris BMD Dinas Pendidikan, Pemuda dan Olahraga beserta seluruh Satuan Pendidikan (SD/SMP).
                 </p>
               </div>
-              <div class="flex items-center gap-3 self-start sm:self-auto">
-                <button onclick="window.app.exportCSV()" class="btn-3d-white px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
+              <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+                <button onclick="window.app.navigate('kamus')" class="btn-3d-white px-3.5 py-2.5 text-xs sm:text-sm flex items-center gap-2">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+                  <span>Kamus Excel Kode BMD</span>
+                </button>
+                <button onclick="window.app.exportCSV()" class="btn-3d-white px-3.5 py-2.5 text-xs sm:text-sm flex items-center gap-2">
                   <i data-lucide="download" class="w-4 h-4 text-slate-700"></i>
-                  <span>Export Report</span>
+                  <span>Export KIB</span>
                 </button>
                 <button onclick="window.app.openModalAset()" class="btn-3d-primary px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
                   <i data-lucide="plus" class="w-4 h-4"></i>
@@ -631,13 +656,13 @@
               <div class="card-3d card-3d-hover p-5">
                 <div class="flex items-center gap-4">
                   <div class="icon-box-3d icon-3d-purple">
-                    <i data-lucide="briefcase" class="w-6 h-6"></i>
+                    <i data-lucide="boxes" class="w-6 h-6"></i>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold text-slate-500">Total Aset BMD</p>
+                    <p class="text-xs font-bold text-slate-500">Total Aset Dikpora/Sekolah</p>
                     <div class="flex items-baseline gap-2 mt-1">
                       <h3 id="kpi-total-aset" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h3>
-                      <span class="badge-3d bg-emerald-100 text-emerald-700">↑ Terdata</span>
+                      <span class="badge-3d bg-emerald-100 text-emerald-700">↑ KIB Aktif</span>
                     </div>
                   </div>
                 </div>
@@ -648,7 +673,7 @@
                   </span>
                   <span class="flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                    <span id="kpi-aset-hilang">0 Belum Ditemukan</span>
+                    <span id="kpi-aset-hilang">0 Tidak Ditemukan</span>
                   </span>
                 </div>
               </div>
@@ -660,10 +685,10 @@
                     <i data-lucide="clipboard-list" class="w-6 h-6"></i>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold text-slate-500">Sensus & BAP Fisik</p>
+                    <p class="text-xs font-bold text-slate-500">Sensus & BAP Sekolah</p>
                     <div class="flex items-baseline gap-2 mt-1">
                       <h3 id="kpi-total-sensus" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h3>
-                      <span class="badge-3d bg-blue-100 text-blue-700">↑ Aktif</span>
+                      <span class="badge-3d bg-blue-100 text-blue-700">↑ Terverifikasi</span>
                     </div>
                   </div>
                 </div>
@@ -693,40 +718,40 @@
                   </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-                  <span>Akumulasi Nilai Neraca KIB</span>
-                  <span class="text-emerald-600 font-bold">100% Valid</span>
+                  <span>Neraca Aset Pendidikan</span>
+                  <span class="text-emerald-600 font-bold" id="kpi-kamus-count">0 Kode Acuan</span>
                 </div>
               </div>
 
-              <!-- KPI 4: OPD & Usulan Mutasi (Amber 3D) -->
+              <!-- KPI 4: Satuan Pendidikan & Kelayakan (Amber 3D) -->
               <div class="card-3d card-3d-hover p-5">
                 <div class="flex items-center gap-4">
                   <div class="icon-box-3d icon-3d-amber">
-                    <i data-lucide="clock" class="w-6 h-6"></i>
+                    <i data-lucide="school" class="w-6 h-6"></i>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <p class="text-xs font-bold text-slate-500">Kesehatan Aset Daerah</p>
+                    <p class="text-xs font-bold text-slate-500">Kelayakan Sarpras</p>
                     <div class="flex items-baseline gap-2 mt-1">
                       <h3 id="kpi-health-rate" class="text-2xl sm:text-3xl font-extrabold text-slate-900">100%</h3>
-                      <span class="badge-3d bg-emerald-100 text-emerald-700">Kelayakan</span>
+                      <span class="badge-3d bg-emerald-100 text-emerald-700">Laik Pakai</span>
                     </div>
                   </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
-                  <span id="kpi-opd-count">0 Unit OPD Aktif</span>
+                  <span id="kpi-opd-count">0 Sekolah/Unit</span>
                   <span id="kpi-mutasi-pending" class="text-amber-600 font-bold">0 Usul Mutasi</span>
                 </div>
               </div>
             </div>
 
-            <!-- Row 3: 3-Column Analytics Grid (Line Chart, Donut Chart, OPD Progress Bars) -->
+            <!-- Row 3: 3-Column Analytics Grid (Line Chart, Donut Chart, Sekolah Progress Bars) -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <!-- Chart 1: Sebaran Nilai & Item per Kategori KIB (Area Line Chart) -->
               <div class="card-3d p-5 flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-4">
                   <div>
                     <h3 class="text-base font-extrabold text-slate-900">Ikhtisar Kategori KIB</h3>
-                    <p class="text-xs font-medium text-slate-400">Distribusi aset per Kartu Inventaris Barang</p>
+                    <p class="text-xs font-medium text-slate-400">Distribusi aset Dikpora & Sekolah (KIB A–E)</p>
                   </div>
                   <span class="btn-3d-white px-2.5 py-1 text-[11px] font-bold">KIB A – E</span>
                 </div>
@@ -739,8 +764,8 @@
               <div class="card-3d p-5 flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-4">
                   <div>
-                    <h3 class="text-base font-extrabold text-slate-900">Aset Berdasarkan Kondisi</h3>
-                    <p class="text-xs font-medium text-slate-400">Proporsi hasil cek fisik lapangan</p>
+                    <h3 class="text-base font-extrabold text-slate-900">Kondisi Sarpras & BMD</h3>
+                    <p class="text-xs font-medium text-slate-400">Proporsi hasil cek fisik sekolah</p>
                   </div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 items-center gap-4 my-auto">
@@ -757,14 +782,14 @@
                 </div>
               </div>
 
-              <!-- Chart 3: Distribusi Aset per OPD (Horizontal 3D Progress Bars) -->
+              <!-- Chart 3: Distribusi Aset per Sekolah / Unit Dikpora (Horizontal 3D Progress Bars) -->
               <div class="card-3d p-5 flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-4">
                   <div>
-                    <h3 class="text-base font-extrabold text-slate-900">Rekapitulasi Aset per OPD</h3>
-                    <p class="text-xs font-medium text-slate-400">Unit Kerja pengelola BMD terbesar</p>
+                    <h3 class="text-base font-extrabold text-slate-900">Rekapitulasi per Sekolah / Unit</h3>
+                    <p class="text-xs font-medium text-slate-400">Satuan pendidikan & bidang pengelola BMD</p>
                   </div>
-                  <button onclick="window.app.navigate('opd')" class="btn-3d-white px-2.5 py-1 text-[11px] font-bold">Semua OPD</button>
+                  <button onclick="window.app.navigate('kib')" class="btn-3d-white px-2.5 py-1 text-[11px] font-bold">Detail KIB</button>
                 </div>
                 <div id="opd-progress-list" class="space-y-4 my-auto">
                   <!-- Diisi via JS -->
@@ -776,13 +801,13 @@
             <div class="card-3d p-5 sm:p-6">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
-                  <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Daftar Inventaris BMD Terbaru</h3>
-                  <p class="text-xs font-medium text-slate-400">Klik tombol mata (lihat/QR) untuk mencetak label QR inventarisasi</p>
+                  <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Daftar Inventaris BMD Terbaru (Acuan Kode & Nama Jenis Barang)</h3>
+                  <p class="text-xs font-medium text-slate-400">Menampilkan Kode Barang otomatis, Nama Barang (Acuan Kamus), dan Nama Jenis Barang (Spesifik)</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2.5">
                   <div class="input-3d-recessed flex items-center gap-2 px-3 py-1.5 rounded-xl">
                     <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
-                    <input type="text" oninput="window.app.filterDashboardTable(this.value)" placeholder="Cari nama/kode..." class="bg-transparent outline-none text-xs font-semibold text-slate-700 w-36 sm:w-44" />
+                    <input type="text" oninput="window.app.filterDashboardTable(this.value)" placeholder="Cari jenis/kode barang..." class="bg-transparent outline-none text-xs font-semibold text-slate-700 w-40 sm:w-48" />
                   </div>
                   <select id="dash-filter-kondisi" onchange="window.app.renderDashboardTable()" class="btn-3d-white px-3 py-1.5 text-xs font-bold outline-none">
                     <option value="ALL">Semua Kondisi</option>
@@ -797,10 +822,10 @@
                 <table class="w-full text-left border-collapse">
                   <thead>
                     <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                      <th class="pb-3 pl-2">Nama Barang & Kode</th>
-                      <th class="pb-3">OPD Pengguna</th>
+                      <th class="pb-3 pl-2">Kode & Nama Barang (Acuan)</th>
+                      <th class="pb-3">Nama Jenis Barang (Spesifik)</th>
+                      <th class="pb-3">Sekolah / Unit Dikpora</th>
                       <th class="pb-3">Tahun & Nilai</th>
-                      <th class="pb-3">Kelengkapan Sensus</th>
                       <th class="pb-3">Kondisi</th>
                       <th class="pb-3">Keberadaan</th>
                       <th class="pb-3 text-right pr-2">Aksi</th>
@@ -820,8 +845,8 @@
           <section id="view-kib" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 class="text-2xl font-extrabold text-slate-900">Data Master Aset BMD (Kartu Inventaris Barang)</h2>
-                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola data rincian KIB A, KIB B, KIB C, KIB D, dan KIB E beserta label QR inventaris.</p>
+                <h2 class="text-2xl font-extrabold text-slate-900">Data Master Aset BMD (KIB Sekolah & Dikpora)</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Kode Barang & Nama Barang mengacu pada Kamus Excel BMD, sedangkan spesifikasi diketik pada kolom Nama Jenis Barang.</p>
               </div>
               <div class="flex items-center gap-2.5">
                 <button onclick="window.app.exportCSV()" class="btn-3d-white px-3.5 py-2.5 text-xs flex items-center gap-1.5">
@@ -830,7 +855,7 @@
                 </button>
                 <button onclick="window.app.openModalAset()" class="btn-3d-primary px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
                   <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                  <span>Tambah Aset Baru</span>
+                  <span>+ Tambah Aset BMD</span>
                 </button>
               </div>
             </div>
@@ -840,14 +865,14 @@
               <div class="flex flex-wrap items-center gap-2" id="kib-category-pills">
                 <button onclick="window.app.setKibFilter('ALL')" data-kib="ALL" class="kib-pill btn-3d-primary px-3.5 py-1.5 text-xs">Semua KIB</button>
                 <button onclick="window.app.setKibFilter('KIB A - Tanah')" data-kib="KIB A - Tanah" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB A (Tanah)</button>
-                <button onclick="window.app.setKibFilter('KIB B - Peralatan & Mesin')" data-kib="KIB B - Peralatan & Mesin" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB B (Peralatan & Mesin)</button>
-                <button onclick="window.app.setKibFilter('KIB C - Gedung & Bangunan')" data-kib="KIB C - Gedung & Bangunan" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB C (Gedung & Bangunan)</button>
-                <button onclick="window.app.setKibFilter('KIB D - Jalan, Irigasi & Jaringan')" data-kib="KIB D - Jalan, Irigasi & Jaringan" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB D (Jalan & Irigasi)</button>
-                <button onclick="window.app.setKibFilter('KIB E - Aset Tetap Lainnya')" data-kib="KIB E - Aset Tetap Lainnya" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB E (Aset Lainnya)</button>
+                <button onclick="window.app.setKibFilter('KIB B - Peralatan & Mesin')" data-kib="KIB B - Peralatan & Mesin" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB B (Mobiler, TIK & Olahraga)</button>
+                <button onclick="window.app.setKibFilter('KIB C - Gedung & Bangunan')" data-kib="KIB C - Gedung & Bangunan" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB C (Gedung Sekolah/GOR)</button>
+                <button onclick="window.app.setKibFilter('KIB D - Jalan, Irigasi & Jaringan')" data-kib="KIB D - Jalan, Irigasi & Jaringan" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB D (Jaringan/Instalasi)</button>
+                <button onclick="window.app.setKibFilter('KIB E - Aset Tetap Lainnya')" data-kib="KIB E - Aset Tetap Lainnya" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB E (Buku & Lainnya)</button>
               </div>
               <div class="flex items-center gap-2 w-full sm:w-auto">
                 <select id="kib-filter-opd" onchange="window.app.renderKibView()" class="btn-3d-white px-3 py-2 text-xs font-bold outline-none w-full sm:w-auto">
-                  <option value="ALL">Semua OPD</option>
+                  <option value="ALL">Semua Sekolah / Unit</option>
                 </select>
               </div>
             </div>
@@ -857,9 +882,9 @@
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    <th class="pb-3 pl-2">Kode & Nama Barang</th>
-                    <th class="pb-3">Kategori KIB & Merk</th>
-                    <th class="pb-3">OPD & Lokasi Ruangan</th>
+                    <th class="pb-3 pl-2">Kode & Nama Barang (Acuan)</th>
+                    <th class="pb-3">Nama Jenis Barang (Spesifik)</th>
+                    <th class="pb-3">Sekolah / Lokasi Ruangan</th>
                     <th class="pb-3">Tahun / Nilai (Rp)</th>
                     <th class="pb-3">Kondisi & Status</th>
                     <th class="pb-3 text-right pr-2">Tindakan</th>
@@ -873,13 +898,77 @@
           </section>
 
           <!-- ================================================================
-               VIEW 3: SENSUS & CEK FISIK (INVENTARISASI LAPANGAN)
+               VIEW 3: KAMUS ACUAN KODE & NAMA BARANG (IMPORT EXCEL)
+               ================================================================ -->
+          <section id="view-kamus" class="hidden space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Kamus Acuan Kode & Nama Barang BMD (Excel)</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">
+                  Daftar ini menjadi acuan otomatis saat sekolah/dinas menginput aset. Anda juga dapat mengimpor file Excel (<code class="font-bold text-indigo-600">.xlsx / .csv</code>) Anda langsung ke sini.
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <button onclick="window.app.downloadTemplateKamusExcel()" class="btn-3d-white px-3.5 py-2.5 text-xs flex items-center gap-1.5">
+                  <i data-lucide="download" class="w-4 h-4 text-indigo-600"></i>
+                  <span>Unduh Template Excel</span>
+                </button>
+                <label class="btn-3d-emerald px-4 py-2.5 text-xs flex items-center gap-2 cursor-pointer">
+                  <i data-lucide="upload" class="w-4 h-4"></i>
+                  <span>Import File Excel (.xlsx / .csv)</span>
+                  <input type="file" id="excel-kamus-input" accept=".xlsx,.xls,.csv" onchange="window.app.handleImportKamusExcel(event)" class="hidden" />
+                </label>
+                <button onclick="window.app.openModalKamus()" class="btn-3d-primary px-4 py-2.5 text-xs flex items-center gap-1.5">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <span>+ Tambah Kode Acuan</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Petunjuk Kolom Excel -->
+            <div class="card-3d p-4 bg-gradient-to-r from-indigo-50/90 via-white to-emerald-50/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <div class="icon-box-3d icon-3d-emerald w-10 h-10 rounded-xl">
+                  <i data-lucide="check-check" class="w-5 h-5"></i>
+                </div>
+                <div class="text-xs">
+                  <p class="font-extrabold text-slate-900">Format Otomatisasi Kode & Nama Barang Aktif</p>
+                  <p class="text-slate-600 mt-0.5">
+                    File Excel yang diimpor cukup memiliki kolom <strong>Kode Barang</strong> dan <strong>Nama Barang</strong> (serta opsional <strong>Kategori KIB</strong>). Saat input aset, memilih <em>Nama Barang</em> akan langsung memunculkan <em>Kode Barang</em> secara otomatis!
+                  </p>
+                </div>
+              </div>
+              <div class="input-3d-recessed flex items-center gap-2 px-3 py-2 rounded-xl w-full sm:w-64">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400"></i>
+                <input type="text" id="kamus-search-input" oninput="window.app.renderKamusView()" placeholder="Cari kode atau nama acuan..." class="bg-transparent outline-none text-xs font-bold text-slate-700 w-full" />
+              </div>
+            </div>
+
+            <div class="card-3d p-5 overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    <th class="pb-3 pl-2">Kode Barang BMD</th>
+                    <th class="pb-3">Nama Barang (Acuan Resmi Excel)</th>
+                    <th class="pb-3">Kategori KIB Otomatis</th>
+                    <th class="pb-3 text-right pr-2">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="kamus-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                  <!-- Diisi via JS -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- ================================================================
+               VIEW 4: SENSUS & CEK FISIK (INVENTARISASI LAPANGAN)
                ================================================================ -->
           <section id="view-sensus" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 class="text-2xl font-extrabold text-slate-900">Sensus & Pemeriksaan Fisik BMD</h2>
-                <p class="text-xs sm:text-sm font-medium text-slate-500">Catat Berita Acara Pemeriksaan (BAP) fisik barang dan sinkronkan kondisi terkini ke master KIB.</p>
+                <h2 class="text-2xl font-extrabold text-slate-900">Sensus & Pemeriksaan Fisik BMD Sekolah/Dinas</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Catat Berita Acara Pemeriksaan (BAP) fisik barang sekolah dan sinkronkan kondisi terkini ke master KIB.</p>
               </div>
               <button onclick="window.app.openModalSensus()" class="btn-3d-coral px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2 self-start sm:self-auto">
                 <i data-lucide="scan-line" class="w-4 h-4"></i>
@@ -892,8 +981,8 @@
                 <thead>
                   <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                     <th class="pb-3 pl-2">Nomor BAP & Tanggal</th>
-                    <th class="pb-3">Aset BMD Diperiksa</th>
-                    <th class="pb-3">Petugas Pemeriksa</th>
+                    <th class="pb-3">Aset BMD & Jenis Barang</th>
+                    <th class="pb-3">Petugas / Operator Pemeriksa</th>
                     <th class="pb-3">Perubahan Kondisi</th>
                     <th class="pb-3">Keberadaan Fisik</th>
                     <th class="pb-3">Catatan Lapangan</th>
@@ -908,13 +997,13 @@
           </section>
 
           <!-- ================================================================
-               VIEW 4: MUTASI & PENGHAPUSAN BMD
+               VIEW 5: MUTASI & PENGHAPUSAN BMD
                ================================================================ -->
           <section id="view-mutasi" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 class="text-2xl font-extrabold text-slate-900">Mutasi Antar OPD & Usulan Penghapusan</h2>
-                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola perpindahan barang antar ruangan/OPD serta verifikasi SK penghapusan aset rusak berat.</p>
+                <h2 class="text-2xl font-extrabold text-slate-900">Mutasi Antar Sekolah/Unit & Usulan Penghapusan</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola perpindahan barang antar sekolah/ruangan serta verifikasi SK penghapusan aset rusak berat oleh Admin Dinas Dikpora.</p>
               </div>
               <button onclick="window.app.openModalMutasi()" class="btn-3d-primary px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2 self-start sm:self-auto">
                 <i data-lucide="file-plus-2" class="w-4 h-4"></i>
@@ -926,11 +1015,11 @@
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                    <th class="pb-3 pl-2">Tanggal & No. SK/Dokumen</th>
-                    <th class="pb-3">Aset BMD</th>
+                    <th class="pb-3 pl-2">Tanggal & No. SK/Surat</th>
+                    <th class="pb-3">Aset BMD & Jenis Barang</th>
                     <th class="pb-3">Jenis Pengajuan</th>
-                    <th class="pb-3">OPD Asal → Tujuan</th>
-                    <th class="pb-3">Status Persetujuan</th>
+                    <th class="pb-3">Sekolah/Unit Asal → Tujuan</th>
+                    <th class="pb-3">Status Persetujuan Dinas</th>
                     <th class="pb-3 text-right pr-2">Otorisasi / Aksi</th>
                   </tr>
                 </thead>
@@ -942,71 +1031,39 @@
           </section>
 
           <!-- ================================================================
-               VIEW 5: MASTER OPD & PETUGAS PENGURUS BARANG (KHUSUS ADMIN)
+               VIEW 6: DATA SEKOLAH & AKUN NPSN (KHUSUS ADMIN DIKPORA)
                ================================================================ -->
-          <section id="view-opd" class="hidden space-y-6">
+          <section id="view-sekolah" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 class="text-2xl font-extrabold text-slate-900">Master OPD & Akun Pengurus Barang</h2>
-                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola daftar Organisasi Perangkat Daerah (`master_opd`) dan kredensial login petugas (`petugas_bmd`).</p>
+                <h2 class="text-2xl font-extrabold text-slate-900">Data Satuan Pendidikan (Sekolah) & Unit Kerja Dikpora</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola daftar SD, SMP, Bidang Pemuda & Olahraga beserta kredensial login NPSN Operator Sekolah (`satuan_pendidikan`).</p>
               </div>
               <div class="flex items-center gap-2.5">
-                <button onclick="window.app.openModalOpd()" class="btn-3d-white px-4 py-2.5 text-xs font-extrabold flex items-center gap-2">
-                  <i data-lucide="building" class="w-4 h-4 text-indigo-600"></i>
-                  <span>+ Tambah OPD</span>
-                </button>
-                <button onclick="window.app.openModalPetugas()" class="btn-3d-primary px-4 py-2.5 text-xs font-extrabold flex items-center gap-2">
-                  <i data-lucide="user-plus" class="w-4 h-4"></i>
-                  <span>+ Tambah Petugas OPD</span>
+                <button onclick="window.app.openModalSekolah()" class="btn-3d-primary px-4 py-2.5 text-xs font-extrabold flex items-center gap-2">
+                  <i data-lucide="school" class="w-4 h-4"></i>
+                  <span>+ Tambah Sekolah / Unit Dikpora</span>
                 </button>
               </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <!-- Tabel Master OPD -->
-              <div class="card-3d p-5">
-                <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
-                  <i data-lucide="building-2" class="w-5 h-5 text-indigo-600"></i>
-                  <span>Daftar Unit Kerja / OPD (`master_opd`)</span>
-                </h3>
-                <div class="overflow-x-auto">
-                  <table class="w-full text-left border-collapse">
-                    <thead>
-                      <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-400">
-                        <th class="pb-2.5">Kode & Nama OPD</th>
-                        <th class="pb-2.5">Kepala OPD / Pengguna</th>
-                        <th class="pb-2.5 text-right">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody id="opd-table-body" class="divide-y divide-slate-100 text-xs">
-                      <!-- Diisi via JS -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <!-- Tabel Petugas BMD (Hybrid Login Users) -->
-              <div class="card-3d p-5">
-                <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
-                  <i data-lucide="users" class="w-5 h-5 text-rose-500"></i>
-                  <span>Akun Pengurus Barang (`petugas_bmd`)</span>
-                </h3>
-                <div class="overflow-x-auto">
-                  <table class="w-full text-left border-collapse">
-                    <thead>
-                      <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-400">
-                        <th class="pb-2.5">Nama & NIP/Username</th>
-                        <th class="pb-2.5">OPD & Jabatan</th>
-                        <th class="pb-2.5">Status</th>
-                        <th class="pb-2.5 text-right">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody id="petugas-table-body" class="divide-y divide-slate-100 text-xs">
-                      <!-- Diisi via JS -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+            <div class="card-3d p-5 overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    <th class="pb-3 pl-2">NPSN / Username Login</th>
+                    <th class="pb-3">Nama Satuan Pendidikan / Unit Dikpora</th>
+                    <th class="pb-3">Jenjang / Kategori</th>
+                    <th class="pb-3">Kepala Sekolah / Koordinator</th>
+                    <th class="pb-3">Operator / Pengurus Barang</th>
+                    <th class="pb-3">Password Login</th>
+                    <th class="pb-3 text-right pr-2">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="sekolah-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                  <!-- Diisi via JS -->
+                </tbody>
+              </table>
             </div>
           </section>
 
@@ -1014,25 +1071,25 @@
 
         <!-- FLOATING 3D BOTTOM NAVIGATION BAR (MOBILE / TABLET) -->
         <nav class="lg:hidden fixed bottom-3 inset-x-3 rounded-2xl sidebar-3d-dark p-2 flex items-center justify-around z-40 border border-white/15 shadow-2xl">
-          <button onclick="window.app.navigate('dashboard')" data-nav="dashboard" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-active">
+          <button onclick="window.app.navigate('dashboard')" data-nav="dashboard" class="nav-btn flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-active">
             <i data-lucide="home" class="w-4 h-4"></i>
             <span>Dashboard</span>
           </button>
-          <button onclick="window.app.navigate('kib')" data-nav="kib" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+          <button onclick="window.app.navigate('kib')" data-nav="kib" class="nav-btn flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
             <i data-lucide="folder-kanban" class="w-4 h-4"></i>
             <span>Master KIB</span>
           </button>
-          <button onclick="window.app.navigate('sensus')" data-nav="sensus" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+          <button onclick="window.app.navigate('kamus')" data-nav="kamus" class="nav-btn flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Kamus Kode</span>
+          </button>
+          <button onclick="window.app.navigate('sensus')" data-nav="sensus" class="nav-btn flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
             <i data-lucide="clipboard-check" class="w-4 h-4"></i>
             <span>Sensus</span>
           </button>
-          <button onclick="window.app.navigate('mutasi')" data-nav="mutasi" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
-            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
-            <span>Mutasi</span>
-          </button>
-          <button id="mobile-nav-opd" onclick="window.app.navigate('opd')" data-nav="opd" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
-            <i data-lucide="building-2" class="w-4 h-4"></i>
-            <span>OPD</span>
+          <button id="mobile-nav-sekolah" onclick="window.app.navigate('sekolah')" data-nav="sekolah" class="nav-btn flex flex-col items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+            <i data-lucide="school" class="w-4 h-4"></i>
+            <span>Sekolah</span>
           </button>
         </nav>
 
@@ -1041,6 +1098,7 @@
 
     <!-- ======================================================================
          MODAL 1: FORM TAMBAH / EDIT ASET BMD (`aset_bmd`)
+         DENGAN FITUR OTOMATISASI KODE BARANG & PEMISAHAN NAMA JENIS BARANG
          ====================================================================== -->
     <div id="modal-aset" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div class="card-3d w-full max-w-2xl p-6 my-8 border-b-8 border-slate-300">
@@ -1050,8 +1108,8 @@
               <i data-lucide="package-plus" class="w-5 h-5"></i>
             </div>
             <div>
-              <h3 id="modal-aset-title" class="text-lg font-extrabold text-slate-900">Tambah Aset BMD Baru</h3>
-              <p class="text-xs text-slate-500">Data tersimpan ke tabel <code class="font-bold">aset_bmd</code></p>
+              <h3 id="modal-aset-title" class="text-lg font-extrabold text-slate-900">Input Inventaris BMD Dikpora / Sekolah</h3>
+              <p class="text-xs text-slate-500">Pilih <strong>Nama Barang (Acuan Excel)</strong> untuk memunculkan <strong>Kode Barang otomatis</strong>, lalu ketik spesifikasi di <strong>Nama Jenis Barang</strong>.</p>
             </div>
           </div>
           <button onclick="window.app.closeModal('modal-aset')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
@@ -1061,35 +1119,62 @@
 
         <form id="form-aset" onsubmit="window.app.saveAset(event)" class="space-y-4">
           <input type="hidden" id="aset-id" />
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Kode Barang Permendagri</label>
-              <input type="text" id="aset-kode" required placeholder="1.3.2.05.01.05.001" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+
+          <!-- KOTAK ACUAN OTOMATIS: PILIH NAMA BARANG -> MUNCUL KODE BARANG OTOMATIS -->
+          <div class="p-4 rounded-2xl bg-indigo-50/70 border-2 border-indigo-200/80 space-y-3.5">
+            <div class="flex items-center justify-between">
+              <span class="badge-3d bg-indigo-600 text-white">LANGKAH 1 — ACUAN KAMUS EXCEL BMD</span>
+              <button type="button" onclick="window.app.closeModal('modal-aset'); window.app.navigate('kamus');" class="text-[11px] font-extrabold text-indigo-700 hover:underline flex items-center gap-1">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                Kelola / Import Kamus Excel
+              </button>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">NUP (No. Urut Pendaftaran)</label>
-              <input type="number" id="aset-nup" required placeholder="1" min="1" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Kategori KIB</label>
-              <select id="aset-kib" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
-                <option value="KIB A - Tanah">KIB A - Tanah</option>
-                <option value="KIB B - Peralatan & Mesin" selected>KIB B - Peralatan & Mesin</option>
-                <option value="KIB C - Gedung & Bangunan">KIB C - Gedung & Bangunan</option>
-                <option value="KIB D - Jalan, Irigasi & Jaringan">KIB D - Jalan, Irigasi & Jaringan</option>
-                <option value="KIB E - Aset Tetap Lainnya">KIB E - Aset Tetap Lainnya</option>
-              </select>
+
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5">
+              <!-- Pilih Nama Barang dari Acuan (Tidak bisa ketik sembarang di luar acuan) -->
+              <div class="sm:col-span-7">
+                <label class="block text-xs font-extrabold text-slate-800 mb-1">
+                  1. Pilih Nama Barang (Acuan Resmi Excel) <span class="text-rose-500">*</span>
+                </label>
+                <div class="space-y-1.5">
+                  <input type="text" id="aset-cari-acuan" oninput="window.app.filterDropdownAcuan(this.value)" placeholder="🔍 Ketik untuk menyaring pilihan nama barang acuan..." class="input-3d-recessed w-full px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700" />
+                  <select id="aset-nama-acuan" required onchange="window.app.handleSelectNamaAcuan(this.value)" class="input-3d-recessed w-full px-3.5 py-2.5 rounded-xl text-xs font-extrabold text-slate-900 cursor-pointer">
+                    <!-- Diisi dari state.kamus_kode_barang -->
+                  </select>
+                </div>
+              </div>
+
+              <!-- Kode Barang Otomatis (Read-Only) -->
+              <div class="sm:col-span-5">
+                <label class="block text-xs font-extrabold text-slate-800 mb-1">
+                  2. Kode Barang (Otomatis) <span class="text-emerald-600">⚡ Auto</span>
+                </label>
+                <input type="text" id="aset-kode" readonly required placeholder="Otomatis muncul saat pilih Nama Barang" class="w-full px-3.5 py-2.5 rounded-xl text-xs font-mono font-extrabold bg-slate-200/80 text-indigo-900 border-2 border-indigo-300 cursor-not-allowed select-all" />
+                <div class="mt-2 flex items-center justify-between">
+                  <span class="text-[11px] font-bold text-slate-500">Kategori KIB:</span>
+                  <input type="text" id="aset-kib" readonly class="px-2.5 py-0.5 rounded-md text-[11px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200 text-right w-44" value="KIB B - Peralatan & Mesin" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Nama / Jenis Barang BMD</label>
-              <input type="text" id="aset-nama" required placeholder="Contoh: Laptop Workstation / Kendaraan Dinas" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          <!-- LANGKAH 2: KOLOM NAMA JENIS BARANG (TEMPAT KETIK BEBAS SPESIFIK BARANG) -->
+          <div class="p-4 rounded-2xl bg-emerald-50/60 border-2 border-emerald-200/80">
+            <div class="flex items-center justify-between mb-2">
+              <span class="badge-3d bg-emerald-600 text-white">LANGKAH 2 — SPESIFIKASI / NAMA JENIS BARANG</span>
+              <span class="text-[11px] font-bold text-emerald-800">Hanya diketik di kolom ini</span>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Merk / Tipe / Spesifikasi</label>
-              <input type="text" id="aset-merk" required placeholder="Contoh: Toyota Innova Zenix / MacBook Pro M3" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
+              <div class="sm:col-span-3">
+                <label class="block text-xs font-extrabold text-slate-800 mb-1">
+                  3. Nama Jenis Barang / Merk / Spesifikasi Lengkap <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="aset-jenis-barang" required placeholder="Ketik spesifik barang di sini (Misal: Meja Siswa Kayu Jati Kelas V / Laptop Asus Core i5 ANBK)" class="input-3d-recessed w-full px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold text-slate-900 border-emerald-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-extrabold text-slate-800 mb-1">NUP (No. Urut)</label>
+                <input type="number" id="aset-nup" required placeholder="1" min="1" class="input-3d-recessed w-full px-3.5 py-2.5 rounded-xl text-xs font-extrabold" />
+              </div>
             </div>
           </div>
 
@@ -1099,11 +1184,11 @@
               <input type="number" id="aset-tahun" required value="2026" min="1980" max="2030" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Nilai Perolehan (Rp)</label>
-              <input type="number" id="aset-nilai" required placeholder="25000000" min="0" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nilai Perolehan / Harga (Rp)</label>
+              <input type="number" id="aset-nilai" required placeholder="15000000" min="0" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Unit Kerja / OPD Pengguna</label>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Satuan Pendidikan / Unit Dikpora</label>
               <select id="aset-opd" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></select>
             </div>
           </div>
@@ -1125,25 +1210,25 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Lokasi / Ruangan</label>
-              <input type="text" id="aset-ruangan" required placeholder="R. Bidang Aset" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+              <label class="block text-xs font-bold text-slate-700 mb-1">Ruangan / Lokasi</label>
+              <input type="text" id="aset-ruangan" required placeholder="Ruang Kelas VI / Lab TIK" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Pemegang Barang</label>
-              <input type="text" id="aset-pemegang" required placeholder="Nama Pegawai" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+              <label class="block text-xs font-bold text-slate-700 mb-1">Penanggung Jawab</label>
+              <input type="text" id="aset-pemegang" required placeholder="Nama Guru / Operator" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan / Nomor Sertifikat / BPKB</label>
-            <input type="text" id="aset-ket" placeholder="Nomor rangka, nomor sertifikat tanah, atau catatan tambahan..." class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            <label class="block text-xs font-bold text-slate-700 mb-1">Sumber Dana & Keterangan (BOS / DAK / APBD / No. BAST)</label>
+            <input type="text" id="aset-ket" placeholder="Contoh: Pengadaan DAK Fisik SD 2026 / Dana BOS Reguler..." class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
           </div>
 
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
             <button type="button" onclick="window.app.closeModal('modal-aset')" class="btn-3d-white px-4 py-2.5 text-xs">Batal</button>
             <button type="submit" class="btn-3d-primary px-5 py-2.5 text-xs flex items-center gap-2">
               <i data-lucide="save" class="w-4 h-4"></i>
-              <span>Simpan Data BMD</span>
+              <span>Simpan ke KIB BMD</span>
             </button>
           </div>
         </form>
@@ -1161,8 +1246,8 @@
               <i data-lucide="clipboard-check" class="w-5 h-5"></i>
             </div>
             <div>
-              <h3 class="text-lg font-extrabold text-slate-900">Input BAP Sensus / Cek Fisik</h3>
-              <p class="text-xs text-slate-500">Otomatis mengupdate status kondisi pada Master Aset</p>
+              <h3 class="text-lg font-extrabold text-slate-900">Input BAP Sensus / Cek Fisik Sekolah</h3>
+              <p class="text-xs text-slate-500">Otomatis mengupdate status kondisi pada Master Aset Sekolah</p>
             </div>
           </div>
           <button onclick="window.app.closeModal('modal-sensus')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
@@ -1174,7 +1259,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Nomor BAP Pemeriksaan</label>
-              <input type="text" id="sensus-bap" required placeholder="BAP/BMD/2026/001" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+              <input type="text" id="sensus-bap" required placeholder="BAP/DIKPORA/2026/001" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Pemeriksaan</label>
@@ -1206,13 +1291,13 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Petugas Pemeriksa</label>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Petugas / Operator Sekolah</label>
             <input type="text" id="sensus-petugas" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
           </div>
 
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Temuan Lapangan</label>
-            <textarea id="sensus-catatan" rows="2" required placeholder="Contoh: Barang berfungsi normal dan stiker QR terpasang rapi." class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></textarea>
+            <textarea id="sensus-catatan" rows="2" required placeholder="Contoh: Barang berfungsi baik di ruang kelas dan stiker QR BMD terpasang." class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></textarea>
           </div>
 
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
@@ -1237,8 +1322,8 @@
               <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
             </div>
             <div>
-              <h3 class="text-lg font-extrabold text-slate-900">Pengajuan Mutasi / Penghapusan BMD</h3>
-              <p class="text-xs text-slate-500">Tersimpan ke tabel <code class="font-bold">mutasi_bmd</code></p>
+              <h3 class="text-lg font-extrabold text-slate-900">Pengajuan Mutasi / Usul Hapus BMD</h3>
+              <p class="text-xs text-slate-500">Diverifikasi oleh Admin Dinas Dikpora (`mutasi_bmd`)</p>
             </div>
           </div>
           <button onclick="window.app.closeModal('modal-mutasi')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
@@ -1256,8 +1341,8 @@
             <div>
               <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Pengajuan</label>
               <select id="mutasi-jenis" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
-                <option value="Pindah OPD">Mutasi Antar OPD</option>
-                <option value="Pindah Ruangan">Mutasi Antar Ruangan</option>
+                <option value="Pindah Sekolah/Unit">Mutasi Antar Sekolah / Unit</option>
+                <option value="Pindah Ruangan">Mutasi Antar Ruangan Kelas</option>
                 <option value="Usul Hapus">Usulan Penghapusan (Rusak Berat)</option>
               </select>
             </div>
@@ -1269,18 +1354,18 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">OPD / Lokasi Asal</label>
-              <input type="text" id="mutasi-asal" required placeholder="Dinas Pendidikan" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+              <label class="block text-xs font-bold text-slate-700 mb-1">Sekolah / Lokasi Asal</label>
+              <input type="text" id="mutasi-asal" required placeholder="SDN 1 / Ruang Kelas" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">OPD Tujuan / Keterangan Hapus</label>
-              <input type="text" id="mutasi-tujuan" required placeholder="BPKAD / Pemusnahan Lelang" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+              <label class="block text-xs font-bold text-slate-700 mb-1">Sekolah Tujuan / Gudang Dikpora</label>
+              <input type="text" id="mutasi-tujuan" required placeholder="Gudang Aset Dikpora / Pemusnahan" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nomor SK / Nota Dinas Pengajuan</label>
-            <input type="text" id="mutasi-sk" required placeholder="SK-MUT/BMD/2026/012" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nomor Berita Acara / Surat Usulan Sekolah</label>
+            <input type="text" id="mutasi-sk" required placeholder="BA-USUL/SDN1/2026/012" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
           </div>
 
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
@@ -1295,86 +1380,114 @@
     </div>
 
     <!-- ======================================================================
-         MODAL 4: FORM MASTER OPD (`master_opd`)
+         MODAL 4: FORM SATUAN PENDIDIKAN / SEKOLAH (`satuan_pendidikan`)
          ====================================================================== -->
-    <div id="modal-opd" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div class="card-3d w-full max-w-md p-6 border-b-8 border-slate-300">
+    <div id="modal-sekolah" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="card-3d w-full max-w-lg p-6 my-8 border-b-8 border-slate-300">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
-          <h3 class="text-lg font-extrabold text-slate-900">Tambah Unit Kerja / OPD</h3>
-          <button onclick="window.app.closeModal('modal-opd')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+          <div class="flex items-center gap-2.5">
+            <div class="icon-box-3d icon-3d-purple w-10 h-10">
+              <i data-lucide="school" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-900">Tambah Satuan Pendidikan / Unit Dikpora</h3>
+              <p class="text-xs text-slate-500">Sekaligus membuat akun login NPSN Operator Sekolah</p>
+            </div>
+          </div>
+          <button onclick="window.app.closeModal('modal-sekolah')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
-        <form id="form-opd" onsubmit="window.app.saveOpd(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Kode OPD</label>
-            <input type="text" id="opd-kode" required placeholder="4.02.01" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+        <form id="form-sekolah" onsubmit="window.app.saveSekolah(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">NPSN / Username Login</label>
+              <input type="text" id="sekolah-npsn" required placeholder="40200125" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Password Login Sekolah</label>
+              <input type="text" id="sekolah-password" required value="dikpora2026" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nama OPD / Instansi Daerah</label>
-            <input type="text" id="opd-nama" required placeholder="Badan Pengelola Keuangan dan Aset Daerah" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nama Sekolah / Unit Dikpora</label>
+              <input type="text" id="sekolah-nama" required placeholder="SDN 2 Banawa / SMPN 1 Donggala" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Jenjang / Unit</label>
+              <select id="sekolah-jenjang" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="SD">SD Negeri/Swasta</option>
+                <option value="SMP">SMP Negeri/Swasta</option>
+                <option value="PAUD/TK">PAUD / TK</option>
+                <option value="Bidang Dikpora">Bidang Kantor Dikpora</option>
+                <option value="Kepemudaan & Olahraga">Prasarana Pemuda & GOR</option>
+              </select>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kepala OPD / Pengguna Barang</label>
-            <input type="text" id="opd-kepala" required placeholder="Drs. H. Ahmad Fauzi, M.Si" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kepala Sekolah / Kabid</label>
+              <input type="text" id="sekolah-kepala" required placeholder="Hj. Fatimah, S.Pd., M.Pd" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nama Operator / Pengurus Barang</label>
+              <input type="text" id="sekolah-operator" required placeholder="Moh. Rizky, S.Kom" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
           </div>
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-            <button type="button" onclick="window.app.closeModal('modal-opd')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
-            <button type="submit" class="btn-3d-primary px-5 py-2 text-xs">Simpan OPD</button>
+            <button type="button" onclick="window.app.closeModal('modal-sekolah')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-primary px-5 py-2 text-xs">Simpan Sekolah & Akun</button>
           </div>
         </form>
       </div>
     </div>
 
     <!-- ======================================================================
-         MODAL 5: FORM PETUGAS PENGURUS BARANG (`petugas_bmd`)
+         MODAL 5: TAMBAH MANUAL KAMUS ACUAN KODE BARANG (`kamus_kode_barang`)
          ====================================================================== -->
-    <div id="modal-petugas" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div id="modal-kamus" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="card-3d w-full max-w-md p-6 border-b-8 border-slate-300">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
-          <h3 class="text-lg font-extrabold text-slate-900">Tambah Akun Pengurus Barang</h3>
-          <button onclick="window.app.closeModal('modal-petugas')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+          <h3 class="text-lg font-extrabold text-slate-900">Tambah Kode & Nama Barang Acuan</h3>
+          <button onclick="window.app.closeModal('modal-kamus')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
         </div>
-        <form id="form-petugas" onsubmit="window.app.savePetugas(event)" class="space-y-4">
+        <form id="form-kamus" onsubmit="window.app.saveKamusManual(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">NIP / Username Login</label>
-            <input type="text" id="petugas-nip" required placeholder="199203152019031002" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kode Barang BMD (Sesuai Excel)</label>
+            <input type="text" id="kamus-kode" required placeholder="1.3.2.05.002.001.008" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-mono font-bold" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Password Login</label>
-            <input type="text" id="petugas-password" required placeholder="bmd2026" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Barang (Acuan Standar)</label>
+            <input type="text" id="kamus-nama" required placeholder="Meja Sekolah (Meja Siswa SD/SMP)" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Petugas</label>
-            <input type="text" id="petugas-nama" required placeholder="Rizky Pratama, S.Ak" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
-          </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Jabatan</label>
-              <input type="text" id="petugas-jabatan" required value="Pengurus Barang" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1">Unit OPD</label>
-              <select id="petugas-opd" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></select>
-            </div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kategori KIB</label>
+            <select id="kamus-kib" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+              <option value="KIB A - Tanah">KIB A - Tanah</option>
+              <option value="KIB B - Peralatan & Mesin" selected>KIB B - Peralatan & Mesin</option>
+              <option value="KIB C - Gedung & Bangunan">KIB C - Gedung & Bangunan</option>
+              <option value="KIB D - Jalan, Irigasi & Jaringan">KIB D - Jalan, Irigasi & Jaringan</option>
+              <option value="KIB E - Aset Tetap Lainnya">KIB E - Aset Tetap Lainnya</option>
+            </select>
           </div>
           <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
-            <button type="button" onclick="window.app.closeModal('modal-petugas')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
-            <button type="submit" class="btn-3d-primary px-5 py-2 text-xs">Simpan Akun</button>
+            <button type="button" onclick="window.app.closeModal('modal-kamus')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-primary px-5 py-2 text-xs">Simpan ke Kamus</button>
           </div>
         </form>
       </div>
     </div>
 
     <!-- ======================================================================
-         MODAL 6: DETAIL & CETAK LABEL QR INVENTARIS BMD
+         MODAL 6: DETAIL & CETAK LABEL QR INVENTARIS BMD SEKOLAH
          ====================================================================== -->
     <div id="modal-qr" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div class="card-3d w-full max-w-md p-6 border-b-8 border-slate-300">
         <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
-          <h3 class="text-base font-extrabold text-slate-900">Label QR Inventarisasi BMD</h3>
+          <h3 class="text-base font-extrabold text-slate-900">Label QR Inventarisasi BMD Dikpora</h3>
           <button onclick="window.app.closeModal('modal-qr')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
             <i data-lucide="x" class="w-4 h-4"></i>
           </button>
@@ -1383,8 +1496,8 @@
         <div id="printable-area" class="border-2 border-slate-900 rounded-2xl p-4 bg-white">
           <div class="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-3">
             <div>
-              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Pemerintah Daerah — Kartu Label BMD</p>
-              <h4 id="qr-opd-name" class="text-xs font-extrabold text-slate-900">BPKAD</h4>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">DINAS PENDIDIKAN, PEMUDA & OLAHRAGA</p>
+              <h4 id="qr-opd-name" class="text-xs font-extrabold text-slate-900">SDN 1</h4>
             </div>
             <span id="qr-tahun" class="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-extrabold">2026</span>
           </div>
@@ -1394,11 +1507,11 @@
             </div>
             <div class="text-xs space-y-1 min-w-0 flex-1">
               <p class="font-mono font-extrabold text-slate-900 text-xs truncate" id="qr-kode-nup">1.3.2.05.01 - NUP #1</p>
-              <p class="font-extrabold text-slate-800 text-sm leading-tight" id="qr-nama-barang">Laptop Dinas</p>
-              <p class="text-slate-500 text-[11px]" id="qr-merk">Merk/Tipe</p>
+              <p class="font-bold text-indigo-700 text-[11px] leading-tight" id="qr-nama-barang">Nama Barang Acuan</p>
+              <p class="font-extrabold text-slate-900 text-sm leading-tight" id="qr-merk">Nama Jenis Barang Spesifik</p>
               <div class="pt-1 flex items-center gap-2 text-[11px] font-bold">
                 <span id="qr-kondisi" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Baik</span>
-                <span id="qr-ruangan" class="text-slate-600 truncate">Ruang Aset</span>
+                <span id="qr-ruangan" class="text-slate-600 truncate">Ruang Kelas</span>
               </div>
             </div>
           </div>
@@ -1410,6 +1523,112 @@
             <i data-lucide="printer" class="w-4 h-4"></i>
             <span>Cetak Stiker QR</span>
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 7: GENERATOR SQL SUPABASE & PANDUAN DEPLOY
+         ====================================================================== -->
+    <div id="modal-sql" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="card-3d w-full max-w-3xl p-6 my-8 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="icon-box-3d icon-3d-emerald w-10 h-10">
+              <i data-lucide="database" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Script SQL Supabase — SIMBMD DIKPORA & Sekolah</h3>
+              <p class="text-xs text-slate-500">Salin & jalankan pada menu <strong>SQL Editor</strong> di Supabase sebelum mengubah <code>IS_PREVIEW = false</code></p>
+            </div>
+          </div>
+          <button onclick="window.app.closeModal('modal-sql')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <pre id="sql-code-block" class="bg-slate-900 text-emerald-300 p-4 rounded-2xl text-[11px] font-mono overflow-x-auto max-h-80 leading-relaxed select-all">-- SCRIPT SQL SUPABASE: SIMBMD DIKPORA & SATUAN PENDIDIKAN (SEKOLAH)
+CREATE TABLE IF NOT EXISTS public.satuan_pendidikan (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  npsn_username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL DEFAULT 'dikpora2026',
+  nama_sekolah TEXT NOT NULL,
+  jenjang TEXT DEFAULT 'SD',
+  kepala_sekolah TEXT,
+  nama_operator TEXT,
+  status_aktif BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.kamus_kode_barang (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kode_barang TEXT UNIQUE NOT NULL,
+  nama_barang TEXT NOT NULL,
+  kategori_kib TEXT NOT NULL DEFAULT 'KIB B - Peralatan & Mesin',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.aset_bmd (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  kode_barang TEXT NOT NULL,
+  nup INT NOT NULL DEFAULT 1,
+  nama_barang TEXT NOT NULL, -- Nama Barang Acuan dari Kamus Excel
+  nama_jenis_barang TEXT NOT NULL, -- Spesifikasi / Jenis Barang yang diketik user
+  kategori_kib TEXT NOT NULL,
+  tahun_perolehan INT NOT NULL DEFAULT 2026,
+  nilai_perolehan NUMERIC NOT NULL DEFAULT 0,
+  kondisi TEXT NOT NULL DEFAULT 'Baik',
+  status_keberadaan TEXT NOT NULL DEFAULT 'Ada',
+  ruangan_lokasi TEXT,
+  pemegang_barang TEXT,
+  sekolah_id UUID REFERENCES public.satuan_pendidikan(id) ON DELETE SET NULL,
+  keterangan TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.log_inventarisasi (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aset_id UUID REFERENCES public.aset_bmd(id) ON DELETE CASCADE,
+  tanggal_cek DATE NOT NULL DEFAULT CURRENT_DATE,
+  petugas_nama TEXT NOT NULL,
+  kondisi_awal TEXT,
+  kondisi_baru TEXT NOT NULL,
+  keberadaan TEXT NOT NULL DEFAULT 'Ada',
+  catatan_lapangan TEXT,
+  nomor_bap TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS public.mutasi_bmd (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  aset_id UUID REFERENCES public.aset_bmd(id) ON DELETE CASCADE,
+  jenis_mutasi TEXT NOT NULL,
+  opd_asal TEXT NOT NULL,
+  opd_tujuan TEXT NOT NULL,
+  tanggal_mutasi DATE NOT NULL DEFAULT CURRENT_DATE,
+  nomor_sk TEXT NOT NULL,
+  status_persetujuan TEXT NOT NULL DEFAULT 'Menunggu',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE public.satuan_pendidikan ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.kamus_kode_barang ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.aset_bmd ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.log_inventarisasi ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mutasi_bmd ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public Access satuan_pendidikan" ON public.satuan_pendidikan FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access kamus_kode_barang" ON public.kamus_kode_barang FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access aset_bmd" ON public.aset_bmd FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access log_inventarisasi" ON public.log_inventarisasi FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public Access mutasi_bmd" ON public.mutasi_bmd FOR ALL USING (true) WITH CHECK (true);</pre>
+
+        <div class="flex items-center justify-end gap-2.5 mt-4">
+          <button onclick="window.app.copySqlScript()" class="btn-3d-emerald px-4 py-2 text-xs flex items-center gap-1.5">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>Salin Script SQL</span>
+          </button>
+          <button onclick="window.app.closeModal('modal-sql')" class="btn-3d-white px-4 py-2 text-xs">Tutup</button>
         </div>
       </div>
     </div>
@@ -1436,7 +1655,7 @@
   </div>
 
   <!-- ========================================================================
-       MODUL UTAMA JAVASCRIPT (KONFIGURASI SUPABASE, HYBRID AUTH, & 3D ENGINE)
+       MODUL UTAMA JAVASCRIPT (SIMBMD DIKPORA & SEKOLAH + AUTO KODE BARANG)
        ======================================================================== -->
   <script type="module">
     // KONFIGURASI APLIKASI
@@ -1459,15 +1678,58 @@
       navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
     }
 
+    // KAMUS STANDAR KODE & NAMA BARANG BMD DIKPORA & SEKOLAH (DEFAULT ACUAN EXCEL)
+    const DEFAULT_KAMUS_DIKPORA = [
+      { id: 'km-1', kode_barang: '1.3.1.01.001.001.004', nama_barang: 'Tanah Bangunan Pendidikan dan Latihan (Sekolah)', kategori_kib: 'KIB A - Tanah' },
+      { id: 'km-2', kode_barang: '1.3.1.01.001.002.002', nama_barang: 'Tanah Lapangan Olahraga / Kepemudaan', kategori_kib: 'KIB A - Tanah' },
+      { id: 'km-3', kode_barang: '1.3.2.02.001.001.001', nama_barang: 'Kendaraan Dinas Bermotor Perorangan', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-4', kode_barang: '1.3.2.02.001.002.003', nama_barang: 'Sepeda Motor Operasional', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-5', kode_barang: '1.3.2.05.001.004.001', nama_barang: 'Lemari Besi / Metal (Filing Cabinet)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-6', kode_barang: '1.3.2.05.001.004.002', nama_barang: 'Lemari Kayu Sekolah / Arsip Kelas', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-7', kode_barang: '1.3.2.05.001.005.001', nama_barang: 'Rak Besi / Rak Perpustakaan Sekolah', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-8', kode_barang: '1.3.2.05.002.001.001', nama_barang: 'Meja Kerja Kayu / Meja Guru & Kepala Sekolah', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-9', kode_barang: '1.3.2.05.002.001.003', nama_barang: 'Kursi Besi / Metal', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-10', kode_barang: '1.3.2.05.002.001.004', nama_barang: 'Kursi Kayu / Kursi Guru', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-11', kode_barang: '1.3.2.05.002.001.008', nama_barang: 'Meja Sekolah (Meja Siswa SD/SMP)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-12', kode_barang: '1.3.2.05.002.001.009', nama_barang: 'Kursi Sekolah (Kursi Siswa SD/SMP)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-13', kode_barang: '1.3.2.05.002.001.010', nama_barang: 'Papan Tulis (Whiteboard / Papan Tulis Kelas)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-14', kode_barang: '1.3.2.05.002.003.003', nama_barang: 'Mesin Pemotong Rumput Sekolah / Lapangan', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-15', kode_barang: '1.3.2.05.002.004.004', nama_barang: 'A.C. Unit (Air Conditioner Split)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-16', kode_barang: '1.3.2.05.002.004.006', nama_barang: 'Kipas Angin (Stand / Wall Fan)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-17', kode_barang: '1.3.2.05.002.006.002', nama_barang: 'Televisi / Smart TV Pembelajaran', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-18', kode_barang: '1.3.2.05.002.006.003', nama_barang: 'Loudspeaker / Sound System Portable Sekolah', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-19', kode_barang: '1.3.2.05.002.006.028', nama_barang: 'Kamera Digital / Dokumentasi', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-20', kode_barang: '1.3.2.05.002.006.050', nama_barang: 'LCD Projector / Infocus Pembelajaran', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-21', kode_barang: '1.3.2.05.002.006.055', nama_barang: 'Interactive Flat Panel (IFP) / Papan Interaktif Digital', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-22', kode_barang: '1.3.2.07.001.001.052', nama_barang: 'Alat Peraga IPA / Sains SD & SMP', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-23', kode_barang: '1.3.2.07.001.002.012', nama_barang: 'Alat Peraga Matematika / Kit Numerasi', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-24', kode_barang: '1.3.2.08.001.011.048', nama_barang: 'Tempat Tidur UKS & Peralatan UKS Sekolah', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-25', kode_barang: '1.3.2.10.001.002.001', nama_barang: 'P.C Unit (Komputer Desktop Laboratorium/TU)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-26', kode_barang: '1.3.2.10.001.002.002', nama_barang: 'Laptop / Notebook Operasional Sekolah', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-27', kode_barang: '1.3.2.10.001.002.003', nama_barang: 'Chromebook / Notebook ANBK Siswa', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-28', kode_barang: '1.3.2.10.002.003.003', nama_barang: 'Printer (Peralatan Personal Komputer)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-29', kode_barang: '1.3.2.15.003.003.001', nama_barang: 'Alat Olahraga Sepak Bola / Futsal (Gawang & Bola)', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-30', kode_barang: '1.3.2.15.003.003.002', nama_barang: 'Alat Olahraga Bola Voli / Bulutangkis / Tenis Meja', kategori_kib: 'KIB B - Peralatan & Mesin' },
+      { id: 'km-31', kode_barang: '1.3.3.01.001.010.001', nama_barang: 'Bangunan Gedung Tempat Pendidikan (Ruang Kelas)', kategori_kib: 'KIB C - Gedung & Bangunan' },
+      { id: 'km-32', kode_barang: '1.3.3.01.001.010.002', nama_barang: 'Bangunan Gedung Perpustakaan Sekolah', kategori_kib: 'KIB C - Gedung & Bangunan' },
+      { id: 'km-33', kode_barang: '1.3.3.01.001.010.003', nama_barang: 'Bangunan Gedung Laboratorium (IPA / Komputer)', kategori_kib: 'KIB C - Gedung & Bangunan' },
+      { id: 'km-34', kode_barang: '1.3.3.01.001.010.004', nama_barang: 'Bangunan Gedung Ruang Guru & Kepala Sekolah', kategori_kib: 'KIB C - Gedung & Bangunan' },
+      { id: 'km-35', kode_barang: '1.3.3.01.001.010.006', nama_barang: 'Bangunan Toilet / Jamban Siswa & Guru (Sanitasi)', kategori_kib: 'KIB C - Gedung & Bangunan' },
+      { id: 'km-36', kode_barang: '1.3.3.01.001.011.001', nama_barang: 'Bangunan Gedung Olahraga (GOR / Aula Pemuda)', kategori_kib: 'KIB C - Gedung & Bangunan' },
+      { id: 'km-37', kode_barang: '1.3.4.02.002.005.001', nama_barang: 'Instalasi Air Bersih / Sumur Bor & Sanitasi Sekolah', kategori_kib: 'KIB D - Jalan, Irigasi & Jaringan' },
+      { id: 'km-38', kode_barang: '1.3.5.01.001.005.001', nama_barang: 'Buku Pelajaran / Koleksi Perpustakaan (Dana BOS)', kategori_kib: 'KIB E - Aset Tetap Lainnya' },
+      { id: 'km-39', kode_barang: '1.3.5.02.001.001.001', nama_barang: 'Alat Musik Tradisional / Drumband Sekolah', kategori_kib: 'KIB E - Aset Tetap Lainnya' }
+    ];
+
     // State Aplikasi
     const state = {
-      currentUser: null, // { id, name, role: 'admin' | 'petugas', opd_id, jabatan }
+      currentUser: null, // { id, name, role: 'admin' | 'sekolah', sekolah_id, jabatan }
       activeView: 'dashboard',
       kibCategoryFilter: 'ALL',
       dashboardSearchQuery: '',
       globalSearchQuery: '',
-      master_opd: [],
-      petugas_bmd: [],
+      satuan_pendidikan: [],
+      kamus_kode_barang: [...DEFAULT_KAMUS_DIKPORA],
       aset_bmd: [],
       log_inventarisasi: [],
       mutasi_bmd: [],
@@ -1479,40 +1741,25 @@
 
     // Data Dummy Minimalis (Maksimal 2 baris per tabel, HANYA dipakai jika IS_PREVIEW === true)
     function initPreviewDummyData() {
-      state.master_opd = [
+      state.satuan_pendidikan = [
         {
-          id: 'opd-1',
-          kode_opd: '5.02.01',
-          nama_opd: 'BPKAD (Bidang Pengelolaan BMD)',
-          kepala_opd: 'Dr. H. Hendra Wijaya, M.Si',
-          created_at: '2026-01-10T08:00:00Z'
-        },
-        {
-          id: 'opd-2',
-          kode_opd: '1.01.01',
-          nama_opd: 'Dinas Pendidikan & Kebudayaan',
-          kepala_opd: 'Dra. Siti Rahmawati, M.Pd',
-          created_at: '2026-01-12T08:00:00Z'
-        }
-      ];
-
-      state.petugas_bmd = [
-        {
-          id: 'ptg-1',
-          nip_username: '199001012020121001',
+          id: 'sek-1',
+          npsn_username: '40200123',
           password: '123',
-          nama_lengkap: 'Budi Santoso, S.Tr.Ak',
-          jabatan: 'Pengurus Barang Pengguna',
-          opd_id: 'opd-1',
+          nama_sekolah: 'SDN 1 Banawa',
+          jenjang: 'SD',
+          kepala_sekolah: 'Hj. Rahmawati, S.Pd., M.Pd',
+          nama_operator: 'Ahmad Fauzi, S.Kom',
           status_aktif: true
         },
         {
-          id: 'ptg-2',
-          nip_username: '199405122022032004',
+          id: 'sek-2',
+          npsn_username: '40200456',
           password: '123',
-          nama_lengkap: 'Nadia Putri, A.Md',
-          jabatan: 'Pembantu Pengurus Barang',
-          opd_id: 'opd-2',
+          nama_sekolah: 'SMPN 1 Banawa',
+          jenjang: 'SMP',
+          kepala_sekolah: 'Drs. H. Lukman Hakim, M.Si',
+          nama_operator: 'Nadia Putri, A.Md',
           status_aktif: true
         }
       ];
@@ -1520,36 +1767,36 @@
       state.aset_bmd = [
         {
           id: 'ast-1',
-          kode_barang: '1.3.2.02.01.01.001',
+          kode_barang: '1.3.2.05.002.001.008',
           nup: 1,
-          nama_barang: 'Kendaraan Dinas Operasional Kijang Innova Zenix',
+          nama_barang: 'Meja Sekolah (Meja Siswa SD/SMP)',
+          nama_jenis_barang: 'Meja Siswa Tunggal Rangka Besi Kayu Jati Kelas VI (Paket Mobiler SD)',
           kategori_kib: 'KIB B - Peralatan & Mesin',
-          merk_tipe: 'Toyota Zenix 2.0 Hybrid Q',
           tahun_perolehan: 2026,
-          nilai_perolehan: 615000000,
+          nilai_perolehan: 48500000,
           kondisi: 'Baik',
           status_keberadaan: 'Ada',
-          ruangan_lokasi: 'Pool Kendaraan BPKAD',
-          pemegang_barang: 'Budi Santoso, S.Tr.Ak',
-          opd_id: 'opd-1',
-          keterangan: 'BPKB No. M-09823412 / Plat Merah DN 1234 A',
+          ruangan_lokasi: 'Ruang Kelas VI-A',
+          pemegang_barang: 'Ahmad Fauzi, S.Kom',
+          sekolah_id: 'sek-1',
+          keterangan: 'Pengadaan Mobiler SD APBD 2026',
           updated_at: '2026-05-16T09:00:00Z'
         },
         {
           id: 'ast-2',
-          kode_barang: '1.3.3.01.01.01.002',
+          kode_barang: '1.3.2.10.001.002.003',
           nup: 2,
-          nama_barang: 'Gedung Kantor Utama Layanan Pendidikan Terpadu',
-          kategori_kib: 'KIB C - Gedung & Bangunan',
-          merk_tipe: 'Beton Bertulang 3 Lantai (1.200 m2)',
+          nama_barang: 'Chromebook / Notebook ANBK Siswa',
+          nama_jenis_barang: 'Chromebook Acer C733 11.6 Inch Intel Celeron (Paket TIK ANBK SMP)',
+          kategori_kib: 'KIB B - Peralatan & Mesin',
           tahun_perolehan: 2025,
-          nilai_perolehan: 4850000000,
-          kondisi: 'Rusak Ringan',
+          nilai_perolehan: 135000000,
+          kondisi: 'Baik',
           status_keberadaan: 'Ada',
-          ruangan_lokasi: 'Jl. Soekarno Hatta No. 14',
+          ruangan_lokasi: 'Laboratorium Komputer SMPN 1',
           pemegang_barang: 'Nadia Putri, A.Md',
-          opd_id: 'opd-2',
-          keterangan: 'IMB 2025 / Perlu pengecatan ulang sayap timur',
+          sekolah_id: 'sek-2',
+          keterangan: 'DAK Fisik Bidang Pendidikan SMP',
           updated_at: '2026-05-18T10:30:00Z'
         }
       ];
@@ -1559,35 +1806,24 @@
           id: 'log-1',
           aset_id: 'ast-1',
           tanggal_cek: '2026-05-16',
-          petugas_nama: 'Budi Santoso, S.Tr.Ak',
+          petugas_nama: 'Ahmad Fauzi, S.Kom',
           kondisi_awal: 'Baik',
           kondisi_baru: 'Baik',
           keberadaan: 'Ada',
-          catatan_lapangan: 'Fisik kendaraan prima, stiker barcode BMD terpasang di pilar pintu.',
-          nomor_bap: 'BAP/BMD/2026/001'
-        },
-        {
-          id: 'log-2',
-          aset_id: 'ast-2',
-          tanggal_cek: '2026-05-18',
-          petugas_nama: 'Nadia Putri, A.Md',
-          kondisi_awal: 'Baik',
-          kondisi_baru: 'Rusak Ringan',
-          keberadaan: 'Ada',
-          catatan_lapangan: 'Plafon lantai 2 mengalami rembesan air hujan ringan.',
-          nomor_bap: 'BAP/BMD/2026/002'
+          catatan_lapangan: 'Seluruh meja siswa lengkap dan berlabel QR BMD Dikpora.',
+          nomor_bap: 'BAP/DIKPORA-SD/2026/001'
         }
       ];
 
       state.mutasi_bmd = [
         {
           id: 'mut-1',
-          aset_id: 'ast-1',
+          aset_id: 'ast-2',
           jenis_mutasi: 'Pindah Ruangan',
-          opd_asal: 'Sekretariat BPKAD',
-          opd_tujuan: 'Bidang Aset Daerah BPKAD',
+          opd_asal: 'Ruang TU SMPN 1 Banawa',
+          opd_tujuan: 'Laboratorium Komputer SMPN 1 Banawa',
           tanggal_mutasi: '2026-05-19',
-          nomor_sk: 'SK-BAST/BMD/2026/009',
+          nomor_sk: 'BAST-INT/SMPN1/2026/004',
           status_persetujuan: 'Menunggu'
         }
       ];
@@ -1656,16 +1892,20 @@
     async function loadSupabaseData() {
       if (IS_PREVIEW) return;
       try {
-        const [opdRes, ptgRes, asetRes, logRes, mutRes] = await Promise.all([
-          supabase.from('master_opd').select('*').order('created_at', { ascending: true }),
-          supabase.from('petugas_bmd').select('*').order('created_at', { ascending: false }),
+        const [sekRes, kamusRes, asetRes, logRes, mutRes] = await Promise.all([
+          supabase.from('satuan_pendidikan').select('*').order('created_at', { ascending: true }),
+          supabase.from('kamus_kode_barang').select('*').order('kode_barang', { ascending: true }),
           supabase.from('aset_bmd').select('*').order('updated_at', { ascending: false }),
           supabase.from('log_inventarisasi').select('*').order('created_at', { ascending: false }),
           supabase.from('mutasi_bmd').select('*').order('created_at', { ascending: false })
         ]);
 
-        state.master_opd = opdRes.data || [];
-        state.petugas_bmd = ptgRes.data || [];
+        state.satuan_pendidikan = sekRes.data || [];
+        if (kamusRes.data && kamusRes.data.length > 0) {
+          state.kamus_kode_barang = kamusRes.data;
+        } else {
+          state.kamus_kode_barang = [...DEFAULT_KAMUS_DIKPORA];
+        }
         state.aset_bmd = asetRes.data || [];
         state.log_inventarisasi = logRes.data || [];
         state.mutasi_bmd = mutRes.data || [];
@@ -1675,77 +1915,76 @@
     }
 
     // ========================================================================
-    // SISTEM HYBRID AUTHENTICATION
+    // SISTEM HYBRID AUTHENTICATION (DINAS DIKPORA vs SEKOLAH)
     // ========================================================================
     function switchAuthTab(tab) {
-      const btnPetugas = document.getElementById('tab-login-petugas');
+      const btnSekolah = document.getElementById('tab-login-sekolah');
       const btnAdmin = document.getElementById('tab-login-admin');
-      const formPetugas = document.getElementById('form-login-petugas');
+      const formSekolah = document.getElementById('form-login-sekolah');
       const formAdmin = document.getElementById('form-login-admin');
 
-      if (tab === 'petugas') {
-        btnPetugas.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5';
+      if (tab === 'sekolah') {
+        btnSekolah.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5';
         btnAdmin.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5';
-        formPetugas.classList.remove('hidden');
+        formSekolah.classList.remove('hidden');
         formAdmin.classList.add('hidden');
       } else {
         btnAdmin.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5';
-        btnPetugas.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5';
+        btnSekolah.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5';
         formAdmin.classList.remove('hidden');
-        formPetugas.classList.add('hidden');
+        formSekolah.classList.add('hidden');
       }
     }
 
-    // 1. Login Petugas OPD (Query ke Tabel `petugas_bmd`)
-    async function handleLoginPetugas(e) {
+    // 1. Login Satuan Pendidikan / Sekolah (Query ke Tabel `satuan_pendidikan`)
+    async function handleLoginSekolah(e) {
       e.preventDefault();
-      const nip = document.getElementById('login-petugas-nip').value.trim();
-      const pass = document.getElementById('login-petugas-pass').value.trim();
+      const npsn = document.getElementById('login-sekolah-npsn').value.trim();
+      const pass = document.getElementById('login-sekolah-pass').value.trim();
 
       if (IS_PREVIEW) {
-        const found = state.petugas_bmd.find(
-          p => p.nip_username === nip && p.password === pass && p.status_aktif
+        const found = state.satuan_pendidikan.find(
+          s => s.npsn_username === npsn && s.password === pass && s.status_aktif
         );
         if (!found) {
-          showToast('NIP/Username atau kata sandi tidak cocok! Gunakan tombol Quick Login di atas untuk demo.', 'error');
+          showToast('NPSN/Username atau kata sandi tidak cocok! Gunakan tombol Quick Login Sekolah untuk demo.', 'error');
           return;
         }
         enterDashboard({
           id: found.id,
-          name: found.nama_lengkap,
-          role: 'petugas',
-          opd_id: found.opd_id,
-          jabatan: found.jabatan
+          name: found.nama_sekolah,
+          role: 'sekolah',
+          sekolah_id: found.id,
+          jabatan: `Operator: ${found.nama_operator}`
         });
         return;
       }
 
-      // Mode Produksi (IS_PREVIEW === false): Validasi langsung ke tabel `petugas_bmd` di Supabase
       const { data, error } = await supabase
-        .from('petugas_bmd')
+        .from('satuan_pendidikan')
         .select('*')
-        .eq('nip_username', nip)
+        .eq('npsn_username', npsn)
         .eq('password', pass)
         .eq('status_aktif', true)
         .maybeSingle();
 
       if (error || !data) {
-        showToast('Kredensial Petugas tidak valid atau akun non-aktif.', 'error');
+        showToast('Kredensial NPSN Sekolah tidak valid atau akun belum aktif.', 'error');
         return;
       }
 
-      localStorage.setItem('simbmd_petugas_session', JSON.stringify(data));
+      localStorage.setItem('simbmd_sekolah_session', JSON.stringify(data));
       await loadSupabaseData();
       enterDashboard({
         id: data.id,
-        name: data.nama_lengkap,
-        role: 'petugas',
-        opd_id: data.opd_id,
-        jabatan: data.jabatan
+        name: data.nama_sekolah,
+        role: 'sekolah',
+        sekolah_id: data.id,
+        jabatan: `Operator: ${data.nama_operator || data.kepala_sekolah}`
       });
     }
 
-    // 2. Login Admin BPKAD (Supabase Auth `signInWithPassword`)
+    // 2. Login Admin Dinas Dikpora (Supabase Auth `signInWithPassword`)
     async function handleLoginAdmin(e) {
       e.preventDefault();
       const email = document.getElementById('login-admin-email').value.trim();
@@ -1754,10 +1993,10 @@
       if (IS_PREVIEW) {
         enterDashboard({
           id: 'admin-preview',
-          name: email.split('@')[0] || 'Admin BPKAD',
+          name: 'Admin Dinas Dikpora',
           role: 'admin',
-          opd_id: null,
-          jabatan: 'Administrator Utama BPKAD'
+          sekolah_id: null,
+          jabatan: 'Bidang Pembinaan & Aset Dikpora'
         });
         return;
       }
@@ -1773,8 +2012,8 @@
         id: data.user.id,
         name: data.user.email.split('@')[0],
         role: 'admin',
-        opd_id: null,
-        jabatan: 'Admin BPKAD (Supabase Auth)'
+        sekolah_id: null,
+        jabatan: 'Admin Dinas Dikpora'
       });
     }
 
@@ -1784,19 +2023,19 @@
       if (role === 'admin') {
         enterDashboard({
           id: 'admin-demo',
-          name: 'Alex Morgan (BPKAD)',
+          name: 'Admin Dinas Dikpora',
           role: 'admin',
-          opd_id: null,
-          jabatan: 'Kepala Bidang Aset BPKAD'
+          sekolah_id: null,
+          jabatan: 'Bidang Pembinaan SD/SMP & Aset'
         });
       } else {
-        const ptg = state.petugas_bmd[0];
+        const sek = state.satuan_pendidikan[0];
         enterDashboard({
-          id: ptg?.id || 'ptg-demo',
-          name: ptg?.nama_lengkap || 'Budi Santoso, S.Tr.Ak',
-          role: 'petugas',
-          opd_id: ptg?.opd_id || 'opd-1',
-          jabatan: ptg?.jabatan || 'Pengurus Barang OPD'
+          id: sek?.id || 'sek-1',
+          name: sek?.nama_sekolah || 'SDN 1 Banawa',
+          role: 'sekolah',
+          sekolah_id: sek?.id || 'sek-1',
+          jabatan: `NPSN ${sek?.npsn_username || '40200123'} • ${sek?.nama_operator || 'Operator Sekolah'}`
         });
       }
     }
@@ -1806,7 +2045,6 @@
       document.getElementById('auth-screen').classList.add('hidden');
       document.getElementById('main-shell').classList.remove('hidden');
 
-      // Update Header Info
       const initials = userObj.name
         .split(' ')
         .map(w => w[0])
@@ -1817,55 +2055,57 @@
       document.getElementById('user-display-name').textContent = userObj.name;
       document.getElementById('user-display-role').textContent = userObj.jabatan;
 
-      // Greeting Hero
+      const unitPill = document.getElementById('active-unit-pill');
+      const unitLabel = document.getElementById('active-unit-label');
+      unitPill.classList.remove('hidden');
+      unitLabel.textContent = userObj.role === 'admin' ? 'Otoritas: Seluruh Sekolah & Dikpora' : `Filter Aktif: ${userObj.name}`;
+
       const hour = new Date().getHours();
       const waktu = hour < 11 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
-      document.getElementById('hero-greeting').textContent = `${waktu}, ${userObj.name.split(' ')[0]}! 👋`;
+      document.getElementById('hero-greeting').textContent = `${waktu}, ${userObj.name}! 👋`;
 
-      // Hak Akses Menu Master OPD & Petugas (Hanya Admin)
       const adminGroup = document.getElementById('sidebar-admin-group');
-      const mobileOpdBtn = document.getElementById('mobile-nav-opd');
+      const mobileSekBtn = document.getElementById('mobile-nav-sekolah');
       if (userObj.role === 'admin') {
         adminGroup.classList.remove('hidden');
-        mobileOpdBtn.classList.remove('hidden');
+        mobileSekBtn.classList.remove('hidden');
       } else {
         adminGroup.classList.add('hidden');
-        mobileOpdBtn.classList.add('hidden');
-        if (state.activeView === 'opd') state.activeView = 'dashboard';
+        mobileSekBtn.classList.add('hidden');
+        if (state.activeView === 'sekolah') state.activeView = 'dashboard';
       }
 
       navigate(state.activeView);
-      showToast(`Selamat datang, ${userObj.name}!`, 'info');
+      showToast(`Login berhasil sebagai: ${userObj.name}`, 'info');
     }
 
     async function handleLogout() {
       if (!IS_PREVIEW && supabase) {
         await supabase.auth.signOut();
-        localStorage.removeItem('simbmd_petugas_session');
+        localStorage.removeItem('simbmd_sekolah_session');
       }
       state.currentUser = null;
       document.getElementById('main-shell').classList.add('hidden');
       document.getElementById('auth-screen').classList.remove('hidden');
-      showToast('Anda telah keluar dari sesi aplikasi.', 'info');
+      showToast('Anda telah keluar dari sesi SIMBMD DIKPORA.', 'info');
     }
 
     // ========================================================================
     // NAVIGASI & RENDERING KOMPONEN 3D
     // ========================================================================
     function navigate(viewName) {
-      if (viewName === 'opd' && state.currentUser?.role !== 'admin') {
-        showToast('Akses terbatas khusus Administrator BPKAD!', 'error');
+      if (viewName === 'sekolah' && state.currentUser?.role !== 'admin') {
+        showToast('Menu Master Sekolah khusus Admin Dinas Dikpora!', 'error');
         return;
       }
       state.activeView = viewName;
 
-      const views = ['dashboard', 'kib', 'sensus', 'mutasi', 'opd'];
+      const views = ['dashboard', 'kib', 'kamus', 'sensus', 'mutasi', 'sekolah'];
       views.forEach(v => {
         const sec = document.getElementById(`view-${v}`);
         if (sec) sec.classList.toggle('hidden', v !== viewName);
       });
 
-      // Highlight Tombol Navigasi 3D
       document.querySelectorAll('.nav-btn').forEach(btn => {
         const target = btn.getAttribute('data-nav');
         if (target === viewName) {
@@ -1914,11 +2154,19 @@
       renderAll();
     }
 
-    // Filter aset berdasarkan Tahun Global & OPD User (jika login sebagai petugas OPD)
+    function getSekolahName(sekolahId) {
+      const found = state.satuan_pendidikan.find(s => s.id === sekolahId);
+      return found ? `${found.nama_sekolah} (${found.npsn_username})` : 'Dinas Dikpora Kabupaten';
+    }
+
+    // Filter aset berdasarkan Tahun Global & Sekolah User (jika login sebagai Sekolah)
     function getFilteredAsetList() {
       const tahunFilter = document.getElementById('filter-tahun-global')?.value || 'ALL';
       return state.aset_bmd.filter(a => {
-        // Jika petugas OPD, prioritaskan tampilan OPD-nya atau semua jika admin
+        // Jika login sebagai Sekolah, hanya tampilkan aset sekolahnya sendiri
+        if (state.currentUser?.role === 'sekolah' && state.currentUser.sekolah_id) {
+          if (a.sekolah_id !== state.currentUser.sekolah_id) return false;
+        }
         if (tahunFilter !== 'ALL') {
           if (tahunFilter === '2023') {
             if (Number(a.tahun_perolehan) > 2023) return false;
@@ -1927,21 +2175,17 @@
           }
         }
         if (state.globalSearchQuery) {
-          const hay = `${a.nama_barang} ${a.kode_barang} ${a.merk_tipe} ${a.ruangan_lokasi} ${a.pemegang_barang}`.toLowerCase();
+          const hay = `${a.nama_barang} ${a.nama_jenis_barang || ''} ${a.kode_barang} ${a.ruangan_lokasi} ${a.pemegang_barang} ${getSekolahName(a.sekolah_id)}`.toLowerCase();
           if (!hay.includes(state.globalSearchQuery)) return false;
         }
         return true;
       });
     }
 
-    function getOpdName(opdId) {
-      const found = state.master_opd.find(o => o.id === opdId);
-      return found ? found.nama_opd : 'OPD Umum Daerah';
-    }
-
     function renderAll() {
-      // Update counter di sidebar & lonceng
-      document.getElementById('sidebar-count-aset').textContent = state.aset_bmd.length;
+      const visibleAset = getFilteredAsetList();
+      document.getElementById('sidebar-count-aset').textContent = visibleAset.length;
+      document.getElementById('sidebar-count-kamus').textContent = state.kamus_kode_barang.length;
       document.getElementById('sidebar-count-sensus').textContent = state.log_inventarisasi.length;
       document.getElementById('sidebar-count-mutasi').textContent = state.mutasi_bmd.length;
 
@@ -1951,36 +2195,40 @@
       populateSelectOptions();
       renderDashboardView();
       renderKibView();
+      renderKamusView();
       renderSensusView();
       renderMutasiView();
-      renderOpdAndPetugasView();
+      renderSekolahView();
       lucide.createIcons();
     }
 
     function populateSelectOptions() {
-      // Populate OPD Selectors
-      const opdOptionsWithAll = `<option value="ALL">Semua Unit OPD</option>` +
-        state.master_opd.map(o => `<option value="${o.id}">${o.kode_opd} - ${o.nama_opd}</option>`).join('');
+      const isSekolah = state.currentUser?.role === 'sekolah';
+      const sekolahList = isSekolah
+        ? state.satuan_pendidikan.filter(s => s.id === state.currentUser.sekolah_id)
+        : state.satuan_pendidikan;
+
+      const opdOptionsWithAll = (isSekolah ? '' : `<option value="ALL">Semua Sekolah & Unit Dikpora</option>`) +
+        sekolahList.map(s => `<option value="${s.id}">${s.npsn_username} - ${s.nama_sekolah}</option>`).join('');
+
       const opdFilterEl = document.getElementById('kib-filter-opd');
       if (opdFilterEl) {
         const currentVal = opdFilterEl.value;
         opdFilterEl.innerHTML = opdOptionsWithAll;
-        if (currentVal) opdFilterEl.value = currentVal;
+        if (currentVal && !isSekolah) opdFilterEl.value = currentVal;
       }
 
-      const opdOnlyOptions = state.master_opd.length
-        ? state.master_opd.map(o => `<option value="${o.id}">${o.nama_opd}</option>`).join('')
-        : `<option value="">-- Belum Ada OPD --</option>`;
+      const sekolahOnlyOptions = sekolahList.length
+        ? sekolahList.map(s => `<option value="${s.id}">${s.npsn_username} — ${s.nama_sekolah}</option>`).join('')
+        : `<option value="">Dinas Dikpora</option>`;
 
       const asetOpdSelect = document.getElementById('aset-opd');
-      if (asetOpdSelect) asetOpdSelect.innerHTML = opdOnlyOptions;
-
-      const petugasOpdSelect = document.getElementById('petugas-opd');
-      if (petugasOpdSelect) petugasOpdSelect.innerHTML = opdOnlyOptions;
+      if (asetOpdSelect) asetOpdSelect.innerHTML = sekolahOnlyOptions;
 
       // Populate Aset Selectors for Sensus & Mutasi
-      const asetOptions = state.aset_bmd.length
-        ? state.aset_bmd.map(a => `<option value="${a.id}">[${a.kode_barang} #${a.nup}] ${a.nama_barang}</option>`).join('')
+      const visibleAset = getFilteredAsetList();
+      const asetOptions = visibleAset.length
+        ? visibleAset.map(a => `<option value="${a.id}">[${a.kode_barang} #${a.nup}] ${a.nama_barang} — ${a.nama_jenis_barang || ''}</option>`).join('')
         : `<option value="">-- Belum Ada Data Aset BMD --</option>`;
 
       const sensusAsetEl = document.getElementById('sensus-aset-id');
@@ -1988,6 +2236,155 @@
 
       const mutasiAsetEl = document.getElementById('mutasi-aset-id');
       if (mutasiAsetEl) mutasiAsetEl.innerHTML = asetOptions;
+    }
+
+    // ========================================================================
+    // LOGIKA OTOMATISASI KODE BARANG DARI NAMA BARANG ACUAN (EXCEL)
+    // ========================================================================
+    function populateDropdownAcuan(filterQuery = '', selectedNama = '') {
+      const selectEl = document.getElementById('aset-nama-acuan');
+      if (!selectEl) return;
+
+      const q = filterQuery.toLowerCase().trim();
+      const filtered = state.kamus_kode_barang.filter(item =>
+        !q || item.nama_barang.toLowerCase().includes(q) || item.kode_barang.toLowerCase().includes(q)
+      );
+
+      if (!filtered.length) {
+        selectEl.innerHTML = `<option value="">-- Tidak ditemukan di Kamus Acuan --</option>`;
+        return;
+      }
+
+      selectEl.innerHTML = `<option value="">-- Pilih Nama Barang Acuan --</option>` +
+        filtered.map(k => `<option value="${k.nama_barang}" data-kode="${k.kode_barang}" data-kib="${k.kategori_kib}">${k.nama_barang} (${k.kode_barang})</option>`).join('');
+
+      if (selectedNama) {
+        selectEl.value = selectedNama;
+        handleSelectNamaAcuan(selectedNama);
+      } else if (filtered.length > 0 && filterQuery) {
+        // Jika sedang mencari di kotak filter, otomatis pilih baris pertama yang cocok agar kode langsung tampil
+        selectEl.value = filtered[0].nama_barang;
+        handleSelectNamaAcuan(filtered[0].nama_barang);
+      }
+    }
+
+    function filterDropdownAcuan(query) {
+      populateDropdownAcuan(query);
+    }
+
+    function handleSelectNamaAcuan(namaBarang) {
+      const found = state.kamus_kode_barang.find(k => k.nama_barang === namaBarang);
+      const kodeInput = document.getElementById('aset-kode');
+      const kibInput = document.getElementById('aset-kib');
+
+      if (found) {
+        kodeInput.value = found.kode_barang;
+        // Tentukan kategori KIB otomatis dari awalan kode barang jika belum diset
+        let kib = found.kategori_kib;
+        if (!kib) {
+          if (found.kode_barang.startsWith('1.3.1')) kib = 'KIB A - Tanah';
+          else if (found.kode_barang.startsWith('1.3.2')) kib = 'KIB B - Peralatan & Mesin';
+          else if (found.kode_barang.startsWith('1.3.3')) kib = 'KIB C - Gedung & Bangunan';
+          else if (found.kode_barang.startsWith('1.3.4')) kib = 'KIB D - Jalan, Irigasi & Jaringan';
+          else kib = 'KIB E - Aset Tetap Lainnya';
+        }
+        kibInput.value = kib;
+      } else {
+        kodeInput.value = '';
+      }
+    }
+
+    // ========================================================================
+    // IMPORT & TEMPLATE EXCEL KAMUS ACUAN KODE BARANG (SheetJS)
+    // ========================================================================
+    function handleImportKamusExcel(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+
+          if (!rows.length) {
+            showToast('File Excel kosong atau format tidak terbaca.', 'error');
+            return;
+          }
+
+          let importedCount = 0;
+          const newItems = [];
+
+          rows.forEach((r, idx) => {
+            // Deteksi fleksibel nama kolom di Excel pengguna
+            const keys = Object.keys(r);
+            const kodeKey = keys.find(k => /kode/i.test(k)) || keys[0];
+            const namaKey = keys.find(k => /nama/i.test(k)) || keys[1];
+            const kibKey = keys.find(k => /kib|kategori/i.test(k));
+
+            const kodeVal = String(r[kodeKey] || '').trim();
+            const namaVal = String(r[namaKey] || '').trim();
+
+            if (kodeVal && namaVal && kodeVal.toLowerCase() !== 'kode barang') {
+              let kibVal = kibKey ? String(r[kibKey]).trim() : '';
+              if (!kibVal) {
+                if (kodeVal.startsWith('1.3.1')) kibVal = 'KIB A - Tanah';
+                else if (kodeVal.startsWith('1.3.2')) kibVal = 'KIB B - Peralatan & Mesin';
+                else if (kodeVal.startsWith('1.3.3')) kibVal = 'KIB C - Gedung & Bangunan';
+                else if (kodeVal.startsWith('1.3.4')) kibVal = 'KIB D - Jalan, Irigasi & Jaringan';
+                else kibVal = 'KIB E - Aset Tetap Lainnya';
+              }
+
+              const existsIdx = state.kamus_kode_barang.findIndex(
+                item => item.kode_barang === kodeVal || item.nama_barang.toLowerCase() === namaVal.toLowerCase()
+              );
+
+              const itemObj = {
+                id: 'km-xls-' + Date.now() + '-' + idx,
+                kode_barang: kodeVal,
+                nama_barang: namaVal,
+                kategori_kib: kibVal
+              };
+
+              if (existsIdx > -1) {
+                state.kamus_kode_barang[existsIdx] = itemObj;
+              } else {
+                state.kamus_kode_barang.unshift(itemObj);
+              }
+              newItems.push({ kode_barang: kodeVal, nama_barang: namaVal, kategori_kib: kibVal });
+              importedCount++;
+            }
+          });
+
+          if (!IS_PREVIEW && supabase && newItems.length > 0) {
+            await supabase.from('kamus_kode_barang').upsert(newItems, { onConflict: 'kode_barang' });
+            await loadSupabaseData();
+          }
+
+          renderAll();
+          showToast(`Berhasil mengimpor ${importedCount} Kode & Nama Barang Acuan dari Excel!`);
+        } catch (err) {
+          showToast('Gagal membaca file Excel: ' + err.message, 'error');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function downloadTemplateKamusExcel() {
+      const sampleRows = state.kamus_kode_barang.map(k => ({
+        'Kode Barang': k.kode_barang,
+        'Nama Barang': k.nama_barang,
+        'Kategori KIB': k.kategori_kib
+      }));
+      const ws = XLSX.utils.json_to_sheet(sampleRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Acuan_Kode_BMD_Dikpora');
+      XLSX.writeFile(wb, 'Acuan_Kode_dan_Nama_Barang_BMD_Dikpora.xlsx');
+      showToast('File Excel Acuan Kode Barang berhasil diunduh!');
     }
 
     // ========================================================================
@@ -2014,8 +2411,9 @@
       document.getElementById('kpi-kondisi-rusak').textContent = `${kondisiRusak} Rusak`;
 
       document.getElementById('kpi-total-nilai').textContent = formatRupiahSingkat(totalNilai);
+      document.getElementById('kpi-kamus-count').textContent = `${state.kamus_kode_barang.length} Kode Acuan`;
       document.getElementById('kpi-health-rate').textContent = `${healthRate}%`;
-      document.getElementById('kpi-opd-count').textContent = `${state.master_opd.length} Unit OPD`;
+      document.getElementById('kpi-opd-count').textContent = `${state.satuan_pendidikan.length} Sekolah/Unit`;
       document.getElementById('kpi-mutasi-pending').textContent = `${state.mutasi_bmd.length} Log Mutasi`;
 
       renderAnalyticsCharts(list);
@@ -2024,7 +2422,6 @@
     }
 
     function renderAnalyticsCharts(list) {
-      // 1. Area Line Chart: Distribusi Kategori KIB A - E
       const kibLabels = ['KIB A', 'KIB B', 'KIB C', 'KIB D', 'KIB E'];
       const kibCounts = [
         list.filter(a => a.kategori_kib?.startsWith('KIB A')).length,
@@ -2063,9 +2460,7 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
               y: {
                 beginAtZero: true,
@@ -2081,7 +2476,6 @@
         });
       }
 
-      // 2. 3D Donut Chart: Kondisi Aset
       const baik = list.filter(a => a.kondisi === 'Baik').length;
       const ringan = list.filter(a => a.kondisi === 'Rusak Ringan').length;
       const berat = list.filter(a => a.kondisi === 'Rusak Berat').length;
@@ -2108,14 +2502,11 @@
             responsive: true,
             maintainAspectRatio: false,
             cutout: '70%',
-            plugins: {
-              legend: { display: false }
-            }
+            plugins: { legend: { display: false } }
           }
         });
       }
 
-      // Render Custom Legend di Samping Donut
       const pct = val => (total > 0 ? Math.round((val / total) * 100) : 0);
       document.getElementById('donut-legend-box').innerHTML = `
         <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
@@ -2144,8 +2535,8 @@
 
     function renderOpdProgressBars(list) {
       const container = document.getElementById('opd-progress-list');
-      if (!state.master_opd.length) {
-        container.innerHTML = `<div class="text-center py-8 text-xs font-semibold text-slate-400">Belum ada data OPD terdaftar.</div>`;
+      if (!state.satuan_pendidikan.length) {
+        container.innerHTML = `<div class="text-center py-8 text-xs font-semibold text-slate-400">Belum ada satuan pendidikan terdaftar.</div>`;
         return;
       }
 
@@ -2158,24 +2549,23 @@
 
       const totalNilaiAll = list.reduce((s, a) => s + (Number(a.nilai_perolehan) || 0), 0) || 1;
 
-      container.innerHTML = state.master_opd.slice(0, 4).map((opd, idx) => {
-        const asetOpd = list.filter(a => a.opd_id === opd.id);
-        const nilaiOpd = asetOpd.reduce((s, a) => s + (Number(a.nilai_perolehan) || 0), 0);
-        const percent = Math.min(100, Math.max(8, Math.round((nilaiOpd / totalNilaiAll) * 100)));
-        const initials = opd.nama_opd.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+      container.innerHTML = state.satuan_pendidikan.slice(0, 4).map((sek, idx) => {
+        const asetSek = list.filter(a => a.sekolah_id === sek.id);
+        const nilaiSek = asetSek.reduce((s, a) => s + (Number(a.nilai_perolehan) || 0), 0);
+        const percent = Math.min(100, Math.max(8, Math.round((nilaiSek / totalNilaiAll) * 100)));
 
         return `
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-full bg-gradient-to-tr ${colors[idx % colors.length]} text-white font-extrabold text-xs flex items-center justify-center shadow border-2 border-white flex-shrink-0">
-              ${initials}
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr ${colors[idx % colors.length]} text-white font-extrabold text-[10px] flex items-center justify-center shadow border-2 border-white flex-shrink-0">
+              ${sek.jenjang}
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between text-xs mb-1.5">
-                <span class="font-extrabold text-slate-800 truncate">${opd.nama_opd}</span>
-                <span class="font-extrabold text-slate-900 ml-2 flex-shrink-0">${asetOpd.length} Aset (${formatRupiahSingkat(nilaiOpd)})</span>
+                <span class="font-extrabold text-slate-800 truncate">${sek.nama_sekolah} <span class="text-slate-400 font-mono text-[10px]">(${sek.npsn_username})</span></span>
+                <span class="font-extrabold text-slate-900 ml-2 flex-shrink-0">${asetSek.length} Item (${formatRupiahSingkat(nilaiSek)})</span>
               </div>
               <div class="progress-track-3d h-2.5 w-full">
-                <div class="progress-bar-3d h-full bg-gradient-to-r ${colors[idx % colors.length]}" style="width: ${asetOpd.length ? percent : 0}%"></div>
+                <div class="progress-bar-3d h-full bg-gradient-to-r ${colors[idx % colors.length]}" style="width: ${asetSek.length ? percent : 0}%"></div>
               </div>
             </div>
           </div>
@@ -2196,7 +2586,7 @@
       let rows = getFilteredAsetList().filter(a => {
         if (kondisiFilter !== 'ALL' && a.kondisi !== kondisiFilter) return false;
         if (state.dashboardSearchQuery) {
-          const hay = `${a.nama_barang} ${a.kode_barang} ${a.merk_tipe}`.toLowerCase();
+          const hay = `${a.nama_barang} ${a.nama_jenis_barang || ''} ${a.kode_barang}`.toLowerCase();
           if (!hay.includes(state.dashboardSearchQuery)) return false;
         }
         return true;
@@ -2206,7 +2596,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="7" class="py-10 text-center text-xs font-bold text-slate-400">
-              Belum ada data aset BMD yang sesuai filter. Klik "+ Tambah Aset BMD" untuk menambahkan data baru.
+              Belum ada data aset BMD yang sesuai filter. Klik "+ Tambah Aset BMD" untuk menginput data baru.
             </td>
           </tr>
         `;
@@ -2215,10 +2605,6 @@
 
       tbody.innerHTML = rows.map((a, idx) => {
         const iconColors = ['icon-3d-purple', 'icon-3d-blue', 'icon-3d-emerald', 'icon-3d-amber'];
-        const hasLog = state.log_inventarisasi.some(l => l.aset_id === a.id);
-        const progressPct = hasLog ? 100 : 50;
-        const progressColor = hasLog ? 'bg-emerald-500' : 'bg-indigo-500';
-
         const kondisiBadge = a.kondisi === 'Baik'
           ? 'bg-emerald-100 text-emerald-700'
           : a.kondisi === 'Rusak Ringan'
@@ -2238,26 +2624,22 @@
                 </div>
                 <div>
                   <p class="font-extrabold text-slate-900 leading-snug">${a.nama_barang}</p>
-                  <p class="text-[11px] font-mono font-semibold text-slate-400">${a.kode_barang} • NUP #${a.nup}</p>
+                  <p class="text-[11px] font-mono font-bold text-indigo-600">${a.kode_barang} • NUP #${a.nup}</p>
                 </div>
               </div>
             </td>
             <td class="py-3.5 pr-3">
-              <span class="font-bold text-slate-700 block">${getOpdName(a.opd_id)}</span>
-              <span class="text-[11px] text-slate-400 font-medium">${a.ruangan_lokasi}</span>
+              <span class="font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg inline-block text-xs">
+                ${a.nama_jenis_barang || '-'}
+              </span>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="font-bold text-slate-800 block">${getSekolahName(a.sekolah_id)}</span>
+              <span class="text-[11px] text-slate-400 font-medium">${a.ruangan_lokasi} • ${a.pemegang_barang}</span>
             </td>
             <td class="py-3.5 pr-3">
               <span class="font-extrabold text-slate-900 block">${formatRupiah(a.nilai_perolehan)}</span>
               <span class="text-[11px] text-slate-400 font-semibold">Tahun ${a.tahun_perolehan}</span>
-            </td>
-            <td class="py-3.5 pr-3 w-36">
-              <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-700 mb-1">
-                <span>${progressPct}%</span>
-                <span class="text-slate-400">${hasLog ? 'Terverifikasi' : 'Terdaftar'}</span>
-              </div>
-              <div class="progress-track-3d h-2 w-full">
-                <div class="progress-bar-3d h-full ${progressColor}" style="width: ${progressPct}%"></div>
-              </div>
             </td>
             <td class="py-3.5 pr-3">
               <span class="badge-3d ${kondisiBadge}">${a.kondisi}</span>
@@ -2289,7 +2671,7 @@
 
       const rows = getFilteredAsetList().filter(a => {
         if (state.kibCategoryFilter !== 'ALL' && a.kategori_kib !== state.kibCategoryFilter) return false;
-        if (opdFilter !== 'ALL' && a.opd_id !== opdFilter) return false;
+        if (opdFilter !== 'ALL' && a.sekolah_id !== opdFilter) return false;
         return true;
       });
 
@@ -2297,7 +2679,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="6" class="py-12 text-center text-xs font-bold text-slate-400">
-              Tidak ada item aset pada kategori KIB ini. Gunakan tombol "+ Tambah Aset Baru" di kanan atas.
+              Tidak ada item aset pada kategori KIB ini. Gunakan tombol "+ Tambah Aset BMD" di kanan atas.
             </td>
           </tr>
         `;
@@ -2316,14 +2698,17 @@
             <td class="py-3.5 pl-2 pr-3">
               <p class="font-extrabold text-slate-900">${a.nama_barang}</p>
               <p class="text-[11px] font-mono font-bold text-indigo-600">${a.kode_barang} (NUP #${a.nup})</p>
+              <span class="badge-3d bg-indigo-50 text-indigo-700 mt-1">${a.kategori_kib}</span>
             </td>
             <td class="py-3.5 pr-3">
-              <span class="badge-3d bg-indigo-50 text-indigo-700 mb-1">${a.kategori_kib}</span>
-              <p class="text-xs font-semibold text-slate-600">${a.merk_tipe}</p>
+              <p class="font-extrabold text-emerald-900 bg-emerald-50/90 border border-emerald-200 px-3 py-1.5 rounded-xl inline-block">
+                ${a.nama_jenis_barang || '-'}
+              </p>
+              <p class="text-[11px] text-slate-400 mt-1">${a.keterangan || ''}</p>
             </td>
             <td class="py-3.5 pr-3">
-              <p class="font-bold text-slate-800">${getOpdName(a.opd_id)}</p>
-              <p class="text-[11px] text-slate-500">Ruang: ${a.ruangan_lokasi} • Pemegang: ${a.pemegang_barang}</p>
+              <p class="font-bold text-slate-800">${getSekolahName(a.sekolah_id)}</p>
+              <p class="text-[11px] text-slate-500">Ruang: ${a.ruangan_lokasi} • PJ: ${a.pemegang_barang}</p>
             </td>
             <td class="py-3.5 pr-3">
               <p class="font-extrabold text-slate-900">${formatRupiah(a.nilai_perolehan)}</p>
@@ -2344,7 +2729,7 @@
                 <button onclick="window.app.openModalAset('${a.id}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Edit">
                   <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-700"></i>
                 </button>
-                <button onclick="window.app.confirmDelete('aset_bmd', '${a.id}', '${a.nama_barang.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Hapus">
+                <button onclick="window.app.confirmDelete('aset_bmd', '${a.id}', '${(a.nama_jenis_barang || a.nama_barang).replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Hapus">
                   <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
                 </button>
               </div>
@@ -2355,7 +2740,46 @@
     }
 
     // ========================================================================
-    // RENDER VIEW 3: SENSUS & CEK FISIK (`log_inventarisasi`)
+    // RENDER VIEW 3: KAMUS ACUAN KODE BARANG (EXCEL)
+    // ========================================================================
+    function renderKamusView() {
+      const tbody = document.getElementById('kamus-table-body');
+      const q = (document.getElementById('kamus-search-input')?.value || '').toLowerCase().trim();
+
+      const rows = state.kamus_kode_barang.filter(k =>
+        !q || k.kode_barang.toLowerCase().includes(q) || k.nama_barang.toLowerCase().includes(q) || k.kategori_kib.toLowerCase().includes(q)
+      );
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-xs font-bold text-slate-400">Tidak ada kode acuan yang cocok dengan pencarian.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(k => `
+        <tr class="tr-3d-row">
+          <td class="py-3 pl-2 pr-3 font-mono font-extrabold text-indigo-700 text-xs sm:text-sm">${k.kode_barang}</td>
+          <td class="py-3 pr-3 font-extrabold text-slate-900">${k.nama_barang}</td>
+          <td class="py-3 pr-3"><span class="badge-3d bg-indigo-50 text-indigo-700">${k.kategori_kib}</span></td>
+          <td class="py-3 pr-2 text-right">
+            <button onclick="window.app.useKamusForNewAsset('${k.nama_barang.replace(/'/g, "\\'")}')" class="btn-3d-white px-2.5 py-1 text-xs font-bold text-indigo-600 mr-1">
+              + Pakai Input Aset
+            </button>
+            <button onclick="window.app.confirmDelete('kamus_kode_barang', '${k.id}', '${k.nama_barang.replace(/'/g, '')}')" class="btn-3d-white w-7 h-7 inline-flex items-center justify-center">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function useKamusForNewAsset(namaBarangAcuan) {
+      openModalAset();
+      populateDropdownAcuan('', namaBarangAcuan);
+      document.getElementById('aset-jenis-barang')?.focus();
+    }
+
+    // ========================================================================
+    // RENDER VIEW 4: SENSUS & CEK FISIK (`log_inventarisasi`)
     // ========================================================================
     function renderSensusView() {
       const tbody = document.getElementById('sensus-table-body');
@@ -2372,7 +2796,7 @@
 
       tbody.innerHTML = state.log_inventarisasi.map(l => {
         const aset = state.aset_bmd.find(a => a.id === l.aset_id);
-        const namaAset = aset ? aset.nama_barang : 'Aset Telah Dihapus';
+        const namaAset = aset ? `${aset.nama_barang} — ${aset.nama_jenis_barang || ''}` : 'Aset Telah Dihapus';
         const kodeAset = aset ? `${aset.kode_barang} #${aset.nup}` : '-';
 
         return `
@@ -2406,7 +2830,7 @@
     }
 
     // ========================================================================
-    // RENDER VIEW 4: MUTASI & PENGHAPUSAN (`mutasi_bmd`)
+    // RENDER VIEW 5: MUTASI & PENGHAPUSAN (`mutasi_bmd`)
     // ========================================================================
     function renderMutasiView() {
       const tbody = document.getElementById('mutasi-table-body');
@@ -2439,7 +2863,7 @@
             </td>
             <td class="py-3.5 pr-3">
               <p class="font-bold text-slate-800">${aset ? aset.nama_barang : 'Aset BMD'}</p>
-              <p class="text-[11px] font-mono text-slate-400">${aset ? aset.kode_barang : '-'}</p>
+              <p class="text-[11px] font-semibold text-emerald-700">${aset ? aset.nama_jenis_barang : '-'}</p>
             </td>
             <td class="py-3.5 pr-3">
               <span class="badge-3d bg-purple-100 text-purple-700">${m.jenis_mutasi}</span>
@@ -2467,57 +2891,30 @@
     }
 
     // ========================================================================
-    // RENDER VIEW 5: MASTER OPD & PETUGAS (`master_opd` & `petugas_bmd`)
+    // RENDER VIEW 6: MASTER SATUAN PENDIDIKAN / SEKOLAH (`satuan_pendidikan`)
     // ========================================================================
-    function renderOpdAndPetugasView() {
-      const opdBody = document.getElementById('opd-table-body');
-      const ptgBody = document.getElementById('petugas-table-body');
-
-      if (!state.master_opd.length) {
-        opdBody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400 font-bold">Belum ada data OPD.</td></tr>`;
-      } else {
-        opdBody.innerHTML = state.master_opd.map(o => `
-          <tr class="tr-3d-row">
-            <td class="py-3 pr-2">
-              <p class="font-extrabold text-slate-900">${o.nama_opd}</p>
-              <p class="text-[11px] font-mono text-indigo-600 font-bold">Kode: ${o.kode_opd}</p>
-            </td>
-            <td class="py-3 pr-2 font-semibold text-slate-700">${o.kepala_opd}</td>
-            <td class="py-3 text-right">
-              <button onclick="window.app.confirmDelete('master_opd', '${o.id}', '${o.nama_opd.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 inline-flex items-center justify-center">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
-              </button>
-            </td>
-          </tr>
-        `).join('');
+    function renderSekolahView() {
+      const tbody = document.getElementById('sekolah-table-body');
+      if (!state.satuan_pendidikan.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 font-bold">Belum ada satuan pendidikan terdaftar.</td></tr>`;
+        return;
       }
 
-      if (!state.petugas_bmd.length) {
-        ptgBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 font-bold">Belum ada akun petugas.</td></tr>`;
-      } else {
-        ptgBody.innerHTML = state.petugas_bmd.map(p => `
-          <tr class="tr-3d-row">
-            <td class="py-3 pr-2">
-              <p class="font-extrabold text-slate-900">${p.nama_lengkap}</p>
-              <p class="text-[11px] font-mono text-slate-500">NIP/User: ${p.nip_username} • Pass: <code class="bg-slate-100 px-1 rounded">${p.password}</code></p>
-            </td>
-            <td class="py-3 pr-2">
-              <p class="font-bold text-slate-700">${getOpdName(p.opd_id)}</p>
-              <p class="text-[11px] text-slate-400">${p.jabatan}</p>
-            </td>
-            <td class="py-3 pr-2">
-              <span class="badge-3d ${p.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
-                ${p.status_aktif ? 'Aktif' : 'Non-Aktif'}
-              </span>
-            </td>
-            <td class="py-3 text-right">
-              <button onclick="window.app.confirmDelete('petugas_bmd', '${p.id}', '${p.nama_lengkap.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 inline-flex items-center justify-center">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
-              </button>
-            </td>
-          </tr>
-        `).join('');
-      }
+      tbody.innerHTML = state.satuan_pendidikan.map(s => `
+        <tr class="tr-3d-row">
+          <td class="py-3.5 pl-2 pr-3 font-mono font-extrabold text-indigo-700">${s.npsn_username}</td>
+          <td class="py-3.5 pr-3 font-extrabold text-slate-900">${s.nama_sekolah}</td>
+          <td class="py-3.5 pr-3"><span class="badge-3d bg-blue-100 text-blue-700">${s.jenjang}</span></td>
+          <td class="py-3.5 pr-3 font-semibold text-slate-700">${s.kepala_sekolah || '-'}</td>
+          <td class="py-3.5 pr-3 font-semibold text-slate-700">${s.nama_operator || '-'}</td>
+          <td class="py-3.5 pr-3"><code class="px-2 py-0.5 bg-slate-100 rounded font-bold text-slate-700">${s.password}</code></td>
+          <td class="py-3.5 pr-2 text-right">
+            <button onclick="window.app.confirmDelete('satuan_pendidikan', '${s.id}', '${s.nama_sekolah.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 inline-flex items-center justify-center">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
     }
 
     // ========================================================================
@@ -2528,20 +2925,21 @@
       const form = document.getElementById('form-aset');
       form.reset();
       document.getElementById('aset-id').value = '';
+      document.getElementById('aset-cari-acuan').value = '';
 
       if (editId) {
         const item = state.aset_bmd.find(a => a.id === editId);
         if (item) {
-          document.getElementById('modal-aset-title').textContent = 'Edit Data Aset BMD';
+          document.getElementById('modal-aset-title').textContent = 'Edit Data Aset BMD Dikpora / Sekolah';
           document.getElementById('aset-id').value = item.id;
+          populateDropdownAcuan('', item.nama_barang);
           document.getElementById('aset-kode').value = item.kode_barang;
-          document.getElementById('aset-nup').value = item.nup;
           document.getElementById('aset-kib').value = item.kategori_kib;
-          document.getElementById('aset-nama').value = item.nama_barang;
-          document.getElementById('aset-merk').value = item.merk_tipe;
+          document.getElementById('aset-jenis-barang').value = item.nama_jenis_barang || '';
+          document.getElementById('aset-nup').value = item.nup;
           document.getElementById('aset-tahun').value = item.tahun_perolehan;
           document.getElementById('aset-nilai').value = item.nilai_perolehan;
-          document.getElementById('aset-opd').value = item.opd_id;
+          document.getElementById('aset-opd').value = item.sekolah_id;
           document.getElementById('aset-kondisi').value = item.kondisi;
           document.getElementById('aset-keberadaan').value = item.status_keberadaan;
           document.getElementById('aset-ruangan').value = item.ruangan_lokasi;
@@ -2549,7 +2947,8 @@
           document.getElementById('aset-ket').value = item.keterangan || '';
         }
       } else {
-        document.getElementById('modal-aset-title').textContent = 'Tambah Aset BMD Baru';
+        document.getElementById('modal-aset-title').textContent = 'Input Inventaris BMD Dikpora / Sekolah';
+        populateDropdownAcuan('');
         document.getElementById('aset-nup').value = state.aset_bmd.length + 1;
       }
 
@@ -2560,15 +2959,23 @@
     async function saveAset(e) {
       e.preventDefault();
       const editId = document.getElementById('aset-id').value;
+      const namaBarangAcuan = document.getElementById('aset-nama-acuan').value;
+      const kodeOtomatis = document.getElementById('aset-kode').value.trim();
+      const namaJenisBarang = document.getElementById('aset-jenis-barang').value.trim();
+
+      if (!namaBarangAcuan || !kodeOtomatis) {
+        return showToast('Pilih Nama Barang dari daftar Acuan terlebih dahulu agar Kode Barang terisi otomatis!', 'error');
+      }
+
       const payload = {
-        kode_barang: document.getElementById('aset-kode').value.trim(),
+        kode_barang: kodeOtomatis,
         nup: Number(document.getElementById('aset-nup').value),
         kategori_kib: document.getElementById('aset-kib').value,
-        nama_barang: document.getElementById('aset-nama').value.trim(),
-        merk_tipe: document.getElementById('aset-merk').value.trim(),
+        nama_barang: namaBarangAcuan,
+        nama_jenis_barang: namaJenisBarang,
         tahun_perolehan: Number(document.getElementById('aset-tahun').value),
         nilai_perolehan: Number(document.getElementById('aset-nilai').value),
-        opd_id: document.getElementById('aset-opd').value,
+        sekolah_id: document.getElementById('aset-opd').value,
         kondisi: document.getElementById('aset-kondisi').value,
         status_keberadaan: document.getElementById('aset-keberadaan').value,
         ruangan_lokasi: document.getElementById('aset-ruangan').value.trim(),
@@ -2584,7 +2991,7 @@
           showToast('Data aset BMD berhasil diperbarui!');
         } else {
           state.aset_bmd.unshift({ id: 'ast-' + Date.now(), ...payload });
-          showToast('Aset BMD baru berhasil ditambahkan!');
+          showToast(`Aset "${namaJenisBarang}" (${kodeOtomatis}) berhasil ditambahkan!`);
         }
       } else {
         if (editId) {
@@ -2603,11 +3010,38 @@
       renderAll();
     }
 
+    function openModalKamus() {
+      document.getElementById('form-kamus').reset();
+      document.getElementById('modal-kamus').classList.remove('hidden');
+    }
+
+    async function saveKamusManual(e) {
+      e.preventDefault();
+      const payload = {
+        kode_barang: document.getElementById('kamus-kode').value.trim(),
+        nama_barang: document.getElementById('kamus-nama').value.trim(),
+        kategori_kib: document.getElementById('kamus-kib').value
+      };
+
+      if (IS_PREVIEW) {
+        state.kamus_kode_barang.unshift({ id: 'km-' + Date.now(), ...payload });
+        showToast('Kode & Nama Barang Acuan berhasil ditambahkan ke Kamus!');
+      } else {
+        const { error } = await supabase.from('kamus_kode_barang').upsert([payload], { onConflict: 'kode_barang' });
+        if (error) return showToast('Gagal menyimpan kamus: ' + error.message, 'error');
+        await loadSupabaseData();
+        showToast('Kode Acuan tersimpan ke Supabase!');
+      }
+
+      closeModal('modal-kamus');
+      renderAll();
+    }
+
     function openModalSensus() {
       populateSelectOptions();
       document.getElementById('form-sensus').reset();
       document.getElementById('sensus-tanggal').value = new Date().toISOString().split('T')[0];
-      document.getElementById('sensus-bap').value = `BAP/BMD/2026/00${state.log_inventarisasi.length + 1}`;
+      document.getElementById('sensus-bap').value = `BAP/DIKPORA/2026/00${state.log_inventarisasi.length + 1}`;
       document.getElementById('sensus-petugas').value = state.currentUser?.name || '';
       document.getElementById('modal-sensus').classList.remove('hidden');
       lucide.createIcons();
@@ -2657,7 +3091,10 @@
       populateSelectOptions();
       document.getElementById('form-mutasi').reset();
       document.getElementById('mutasi-tanggal').value = new Date().toISOString().split('T')[0];
-      document.getElementById('mutasi-sk').value = `SK-MUT/BMD/2026/00${state.mutasi_bmd.length + 1}`;
+      document.getElementById('mutasi-sk').value = `BA-USUL/DIKPORA/2026/00${state.mutasi_bmd.length + 1}`;
+      if (state.currentUser?.role === 'sekolah') {
+        document.getElementById('mutasi-asal').value = state.currentUser.name;
+      }
       document.getElementById('modal-mutasi').classList.remove('hidden');
       lucide.createIcons();
     }
@@ -2705,62 +3142,51 @@
       renderAll();
     }
 
-    function openModalOpd() {
-      document.getElementById('form-opd').reset();
-      document.getElementById('modal-opd').classList.remove('hidden');
+    function openModalSekolah() {
+      document.getElementById('form-sekolah').reset();
+      document.getElementById('modal-sekolah').classList.remove('hidden');
     }
 
-    async function saveOpd(e) {
+    async function saveSekolah(e) {
       e.preventDefault();
       const payload = {
-        kode_opd: document.getElementById('opd-kode').value.trim(),
-        nama_opd: document.getElementById('opd-nama').value.trim(),
-        kepala_opd: document.getElementById('opd-kepala').value.trim()
-      };
-
-      if (IS_PREVIEW) {
-        state.master_opd.push({ id: 'opd-' + Date.now(), ...payload });
-        showToast('Unit Kerja / OPD baru berhasil ditambahkan!');
-      } else {
-        const { error } = await supabase.from('master_opd').insert([payload]);
-        if (error) return showToast('Gagal menambah OPD: ' + error.message, 'error');
-        await loadSupabaseData();
-        showToast('OPD tersimpan ke Supabase!');
-      }
-
-      closeModal('modal-opd');
-      renderAll();
-    }
-
-    function openModalPetugas() {
-      populateSelectOptions();
-      document.getElementById('form-petugas').reset();
-      document.getElementById('modal-petugas').classList.remove('hidden');
-    }
-
-    async function savePetugas(e) {
-      e.preventDefault();
-      const payload = {
-        nip_username: document.getElementById('petugas-nip').value.trim(),
-        password: document.getElementById('petugas-password').value.trim(),
-        nama_lengkap: document.getElementById('petugas-nama').value.trim(),
-        jabatan: document.getElementById('petugas-jabatan').value.trim(),
-        opd_id: document.getElementById('petugas-opd').value,
+        npsn_username: document.getElementById('sekolah-npsn').value.trim(),
+        password: document.getElementById('sekolah-password').value.trim(),
+        nama_sekolah: document.getElementById('sekolah-nama').value.trim(),
+        jenjang: document.getElementById('sekolah-jenjang').value,
+        kepala_sekolah: document.getElementById('sekolah-kepala').value.trim(),
+        nama_operator: document.getElementById('sekolah-operator').value.trim(),
         status_aktif: true
       };
 
       if (IS_PREVIEW) {
-        state.petugas_bmd.unshift({ id: 'ptg-' + Date.now(), ...payload });
-        showToast('Akun Pengurus Barang berhasil ditambahkan!');
+        state.satuan_pendidikan.push({ id: 'sek-' + Date.now(), ...payload });
+        showToast(`Satuan Pendidikan "${payload.nama_sekolah}" (NPSN: ${payload.npsn_username}) berhasil ditambahkan!`);
       } else {
-        const { error } = await supabase.from('petugas_bmd').insert([payload]);
-        if (error) return showToast('Gagal membuat akun petugas: ' + error.message, 'error');
+        const { error } = await supabase.from('satuan_pendidikan').insert([payload]);
+        if (error) return showToast('Gagal menambah Sekolah: ' + error.message, 'error');
         await loadSupabaseData();
-        showToast('Akun petugas tersimpan ke Supabase!');
+        showToast('Data Sekolah & Akun NPSN tersimpan ke Supabase!');
       }
 
-      closeModal('modal-petugas');
+      closeModal('modal-sekolah');
       renderAll();
+    }
+
+    function openModalSql() {
+      document.getElementById('modal-sql').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function copySqlScript() {
+      const sqlText = document.getElementById('sql-code-block').innerText;
+      const textarea = document.createElement('textarea');
+      textarea.value = sqlText;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      textarea.remove();
+      showToast('Script SQL Supabase berhasil disalin ke Clipboard!');
     }
 
     // Modal Konfirmasi Hapus Custom (Tanpa window.confirm)
@@ -2793,11 +3219,11 @@
       const a = state.aset_bmd.find(item => item.id === asetId);
       if (!a) return;
 
-      document.getElementById('qr-opd-name').textContent = getOpdName(a.opd_id);
+      document.getElementById('qr-opd-name').textContent = getSekolahName(a.sekolah_id);
       document.getElementById('qr-tahun').textContent = a.tahun_perolehan;
       document.getElementById('qr-kode-nup').textContent = `${a.kode_barang} • NUP #${a.nup}`;
       document.getElementById('qr-nama-barang').textContent = a.nama_barang;
-      document.getElementById('qr-merk').textContent = a.merk_tipe;
+      document.getElementById('qr-merk').textContent = a.nama_jenis_barang || '-';
       document.getElementById('qr-kondisi').textContent = a.kondisi;
       document.getElementById('qr-ruangan').textContent = a.ruangan_lokasi;
       document.getElementById('qr-svg-box').innerHTML = generateQrSvg(`${a.kode_barang}-${a.nup}-${a.id}`);
@@ -2815,20 +3241,20 @@
       const list = getFilteredAsetList();
       if (!list.length) return showToast('Tidak ada data aset untuk diekspor.', 'error');
 
-      const headers = ['Kode Barang', 'NUP', 'Nama Barang', 'Kategori KIB', 'Merk/Tipe', 'Tahun', 'Nilai Perolehan', 'Kondisi', 'Keberadaan', 'OPD', 'Lokasi Ruangan', 'Pemegang'];
+      const headers = ['Kode Barang', 'NUP', 'Nama Barang (Acuan)', 'Nama Jenis Barang (Spesifik)', 'Kategori KIB', 'Tahun', 'Nilai Perolehan', 'Kondisi', 'Keberadaan', 'Sekolah / Unit Dikpora', 'Lokasi Ruangan', 'Penanggung Jawab'];
       const csvRows = [
         headers.join(','),
         ...list.map(a => [
           `"${a.kode_barang}"`,
           a.nup,
-          `"${a.nama_barang.replace(/"/g, '""')}"`,
+          `"${(a.nama_barang || '').replace(/"/g, '""')}"`,
+          `"${(a.nama_jenis_barang || '').replace(/"/g, '""')}"`,
           `"${a.kategori_kib}"`,
-          `"${a.merk_tipe.replace(/"/g, '""')}"`,
           a.tahun_perolehan,
           a.nilai_perolehan,
           `"${a.kondisi}"`,
           `"${a.status_keberadaan}"`,
-          `"${getOpdName(a.opd_id)}"`,
+          `"${getSekolahName(a.sekolah_id)}"`,
           `"${a.ruangan_lokasi}"`,
           `"${a.pemegang_barang}"`
         ].join(','))
@@ -2838,10 +3264,10 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Laporan_Inventaris_BMD_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.download = `KIB_SIMBMD_DIKPORA_${new Date().toISOString().slice(0, 10)}.csv`;
       link.click();
       URL.revokeObjectURL(url);
-      showToast('Laporan CSV Inventaris BMD berhasil diunduh!');
+      showToast('Laporan CSV KIB Dikpora berhasil diunduh!');
     }
 
     // Shortcut Keyboard Cmd/Ctrl + K untuk Fokus ke Search Bar 3D
@@ -2859,14 +3285,11 @@
       lucide.createIcons();
 
       if (IS_PREVIEW) {
-        // Tampilkan elemen Preview & isi 2 baris data dummy di memori lokal
         document.getElementById('preview-banner').classList.remove('hidden');
         document.getElementById('auth-preview-shortcuts').classList.remove('hidden');
         initPreviewDummyData();
-        // Otomatis masuk ke dashboard dalam mode preview agar user langsung melihat desain 3D TaskHive
         quickLogin('admin');
       } else {
-        // Mode Produksi (IS_PREVIEW === false): Cek sesi aktif Supabase Auth atau sesi Petugas
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           await loadSupabaseData();
@@ -2874,26 +3297,26 @@
             id: session.user.id,
             name: session.user.email.split('@')[0],
             role: 'admin',
-            opd_id: null,
-            jabatan: 'Admin BPKAD'
+            sekolah_id: null,
+            jabatan: 'Admin Dinas Dikpora'
           });
           return;
         }
 
-        const savedPetugas = localStorage.getItem('simbmd_petugas_session');
-        if (savedPetugas) {
+        const savedSekolah = localStorage.getItem('simbmd_sekolah_session');
+        if (savedSekolah) {
           try {
-            const ptg = JSON.parse(savedPetugas);
+            const sek = JSON.parse(savedSekolah);
             await loadSupabaseData();
             enterDashboard({
-              id: ptg.id,
-              name: ptg.nama_lengkap,
-              role: 'petugas',
-              opd_id: ptg.opd_id,
-              jabatan: ptg.jabatan
+              id: sek.id,
+              name: sek.nama_sekolah,
+              role: 'sekolah',
+              sekolah_id: sek.id,
+              jabatan: `Operator: ${sek.nama_operator || sek.kepala_sekolah}`
             });
           } catch (_) {
-            localStorage.removeItem('simbmd_petugas_session');
+            localStorage.removeItem('simbmd_sekolah_session');
           }
         }
       }
@@ -2902,7 +3325,7 @@
     // Ekspos fungsi ke window.app untuk event handler inline HTML
     window.app = {
       switchAuthTab,
-      handleLoginPetugas,
+      handleLoginSekolah,
       handleLoginAdmin,
       quickLogin,
       handleLogout,
@@ -2914,18 +3337,26 @@
       filterDashboardTable,
       renderDashboardTable,
       renderKibView,
+      renderKamusView,
       renderAll,
+      filterDropdownAcuan,
+      handleSelectNamaAcuan,
+      handleImportKamusExcel,
+      downloadTemplateKamusExcel,
+      useKamusForNewAsset,
       openModalAset,
       saveAset,
+      openModalKamus,
+      saveKamusManual,
       openModalSensus,
       saveSensus,
       openModalMutasi,
       saveMutasi,
       updateStatusMutasi,
-      openModalOpd,
-      saveOpd,
-      openModalPetugas,
-      savePetugas,
+      openModalSekolah,
+      saveSekolah,
+      openModalSql,
+      copySqlScript,
       confirmDelete,
       showQrLabel,
       closeModal,
