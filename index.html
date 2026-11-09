@@ -1,0 +1,2938 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SIMBMD 3D — Sistem Inventarisasi Barang Milik Daerah</title>
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="description" content="Sistem Informasi & Inventarisasi Barang Milik Daerah (BMD) Berbasis 3D Tactile Dashboard & Supabase" />
+
+  <!-- PWA Single-File Inline Manifest -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"SIMBMD 3D - Sistem Inventarisasi BMD","short_name":"SIMBMD 3D","start_url":".","display":"standalone","background_color":"#F4F6FB","theme_color":"#0F172A","icons":[{"src":"https://placehold.co/192x192/4F46E5/FFFFFF?text=BMD","sizes":"192x192","type":"image/png"},{"src":"https://placehold.co/512x512/4F46E5/FFFFFF?text=SIMBMD","sizes":"512x512","type":"image/png"}]}' />
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            canvas: '#F4F6FB',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* ==========================================================================
+       3D TACTILE ENTERPRISE DESIGN SYSTEM (TASKHIVE 3D EDITION)
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #F4F6FB;
+      color: #0F172A;
+      overflow: hidden;
+    }
+
+    /* Fullscreen App Wrapper */
+    #app-fullscreen-wrapper {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      background-color: #F4F6FB;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #EEF2F9;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94A3B8;
+    }
+
+    /* 1. 3D Elevated Card (.card-3d) */
+    .card-3d {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FDFEFF 100%);
+      border-radius: 18px;
+      border: 1px solid #E2E8F0;
+      border-bottom: 4px solid #CBD5E1;
+      box-shadow: 0 12px 24px -6px rgba(15, 23, 42, 0.06), 0 4px 8px -2px rgba(15, 23, 42, 0.03), inset 0 2px 0 0 #FFFFFF;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    }
+    .card-3d-hover:hover {
+      transform: translateY(-4px);
+      border-bottom-color: #94A3B8;
+      box-shadow: 0 20px 32px -10px rgba(79, 70, 229, 0.12), 0 8px 16px -4px rgba(15, 23, 42, 0.05), inset 0 2px 0 0 #FFFFFF;
+    }
+
+    /* 2. 3D Dark Sidebar & Active Pill */
+    .sidebar-3d-dark {
+      background: linear-gradient(180deg, #0F172A 0%, #131B36 55%, #1E1B4B 100%);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 10px 0 30px -5px rgba(15, 23, 42, 0.35);
+    }
+    .nav-pill-3d-active {
+      background: linear-gradient(90deg, #FF5E62 0%, #FF9966 100%);
+      color: #FFFFFF !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.45);
+      border-bottom: 3px solid #BE123C;
+      box-shadow: 0 8px 20px -4px rgba(244, 63, 94, 0.55), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      transform: translateY(-1px);
+    }
+    .nav-pill-3d-inactive {
+      color: #94A3B8;
+      border-bottom: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .nav-pill-3d-inactive:hover {
+      color: #F8FAFC;
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateX(3px);
+    }
+
+    /* 3. 3D Glossy Icon Boxes (.icon-box-3d) */
+    .icon-box-3d {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      border-top: 1px solid rgba(255, 255, 255, 0.45);
+      border-bottom: 3px solid rgba(0, 0, 0, 0.25);
+      box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.45), 0 6px 14px -2px rgba(15, 23, 42, 0.22);
+      flex-shrink: 0;
+    }
+    .icon-3d-purple {
+      background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+      box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.45), 0 8px 16px -3px rgba(109, 40, 217, 0.4);
+    }
+    .icon-3d-blue {
+      background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+      box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.45), 0 8px 16px -3px rgba(29, 78, 216, 0.4);
+    }
+    .icon-3d-emerald {
+      background: linear-gradient(135deg, #10B981 0%, #047857 100%);
+      box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.45), 0 8px 16px -3px rgba(4, 120, 87, 0.4);
+    }
+    .icon-3d-amber {
+      background: linear-gradient(135deg, #F59E0B 0%, #B45309 100%);
+      box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.45), 0 8px 16px -3px rgba(180, 83, 9, 0.4);
+    }
+    .icon-3d-rose {
+      background: linear-gradient(135deg, #F43F5E 0%, #BE123C 100%);
+      box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.45), 0 8px 16px -3px rgba(190, 18, 60, 0.4);
+    }
+
+    /* 4. 3D Tactile Push Buttons */
+    .btn-3d-primary {
+      background: linear-gradient(180deg, #6366F1 0%, #4F46E5 100%);
+      color: #FFFFFF;
+      font-weight: 700;
+      border-radius: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+      border-bottom: 4px solid #312E81;
+      box-shadow: 0 6px 14px -2px rgba(79, 70, 229, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .btn-3d-primary:hover {
+      background: linear-gradient(180deg, #7174F8 0%, #5850EC 100%);
+      transform: translateY(-1px);
+    }
+    .btn-3d-primary:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+      box-shadow: 0 2px 6px -1px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-3d-coral {
+      background: linear-gradient(90deg, #FF5E62 0%, #FF9966 100%);
+      color: #FFFFFF;
+      font-weight: 700;
+      border-radius: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.4);
+      border-bottom: 4px solid #9F1239;
+      box-shadow: 0 6px 15px -2px rgba(244, 63, 94, 0.45);
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .btn-3d-coral:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+    }
+
+    .btn-3d-emerald {
+      background: linear-gradient(180deg, #10B981 0%, #059669 100%);
+      color: #FFFFFF;
+      font-weight: 700;
+      border-radius: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+      border-bottom: 4px solid #065F46;
+      box-shadow: 0 6px 14px -2px rgba(16, 185, 129, 0.4);
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .btn-3d-emerald:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+    }
+
+    .btn-3d-white {
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
+      color: #334155;
+      font-weight: 600;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+      border-bottom: 4px solid #CBD5E1;
+      box-shadow: 0 4px 10px -2px rgba(15, 23, 42, 0.05), inset 0 1px 0 #FFFFFF;
+      transition: all 0.12s ease;
+      cursor: pointer;
+    }
+    .btn-3d-white:hover {
+      background: #FFFFFF;
+      color: #0F172A;
+      border-bottom-color: #94A3B8;
+    }
+    .btn-3d-white:active {
+      transform: translateY(3px);
+      border-bottom-width: 1px;
+    }
+
+    /* 5. 3D Recessed Input (.input-3d-recessed) */
+    .input-3d-recessed {
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-top: 2px solid #CBD5E1;
+      box-shadow: inset 0 2px 5px rgba(15, 23, 42, 0.06), 0 1px 0 #FFFFFF;
+      transition: all 0.2s ease;
+    }
+    .input-3d-recessed:focus, .input-3d-recessed:focus-within {
+      background: #FFFFFF;
+      border-color: #6366F1;
+      box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03), 0 0 0 3px rgba(99, 102, 241, 0.18);
+      outline: none;
+    }
+
+    /* 6. 3D Progress Track & Bar */
+    .progress-track-3d {
+      background: #E2E8F0;
+      border-radius: 9999px;
+      box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.15);
+      overflow: hidden;
+    }
+    .progress-bar-3d {
+      border-radius: 9999px;
+      box-shadow: inset 0 2px 2px rgba(255, 255, 255, 0.45), 0 2px 4px rgba(0, 0, 0, 0.15);
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 7. 3D Table Row Elevation on Hover */
+    .tr-3d-row {
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    }
+    .tr-3d-row:hover {
+      background-color: #F8FAFC;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.07);
+    }
+
+    /* 8. 3D Pill Badges */
+    .badge-3d {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 700;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    /* Print Styling for Label QR & BAP */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printable-area, #printable-area * {
+        visibility: visible;
+      }
+      #printable-area {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-fullscreen-wrapper">
+    <!-- ======================================================================
+         PREVIEW MODE BANNER (HANYA MUNCUL JIKA IS_PREVIEW === true)
+         ====================================================================== -->
+    <div id="preview-banner" class="hidden bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white px-4 py-1.5 text-xs font-bold flex flex-wrap items-center justify-between gap-2 shadow-md z-50">
+      <div class="flex items-center gap-2">
+        <span class="px-2 py-0.5 bg-black/25 rounded-full uppercase tracking-wider text-[10px]">Mode Preview Aktif</span>
+        <span>Data berjalan di memori lokal (Maks 2 baris dummy). Ubah <code class="bg-black/20 px-1.5 py-0.5 rounded">IS_PREVIEW = false</code> saat deploy untuk koneksi penuh ke Supabase.</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="window.app.quickLogin('admin')" class="bg-white text-slate-900 hover:bg-slate-100 px-2.5 py-1 rounded-lg text-[11px] font-extrabold shadow-sm transition">
+          ⚡ Quick Admin BPKAD
+        </button>
+        <button onclick="window.app.quickLogin('petugas')" class="bg-slate-900 text-white hover:bg-slate-800 px-2.5 py-1 rounded-lg text-[11px] font-extrabold shadow-sm transition">
+          ⚡ Quick Pengurus Barang OPD
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         HALAMAN LOGIN 3D (HYBRID AUTHENTICATION)
+         ====================================================================== -->
+    <div id="auth-screen" class="flex-1 flex items-center justify-center p-4 overflow-y-auto bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 relative">
+      <!-- Dekorasi 3D Orbs Latar -->
+      <div class="absolute top-12 left-12 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-12 right-12 w-80 h-80 bg-rose-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="card-3d w-full max-w-md p-6 sm:p-8 relative z-10 border-b-8 border-slate-300">
+        <!-- Brand Header 3D -->
+        <div class="flex items-center gap-3.5 mb-6">
+          <div class="icon-box-3d icon-3d-purple w-14 h-14 rounded-2xl">
+            <i data-lucide="boxes" class="w-8 h-8 text-white"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">SIMBMD 3D</h1>
+              <span class="badge-3d bg-indigo-100 text-indigo-700">v2026</span>
+            </div>
+            <p class="text-xs font-semibold text-slate-500">Plan. Track. Verify. — Inventarisasi Aset Daerah</p>
+          </div>
+        </div>
+
+        <!-- Tab Switcher Hybrid Login -->
+        <div class="grid grid-cols-2 gap-2 p-1.5 bg-slate-100 rounded-2xl mb-6 border border-slate-200 shadow-inner">
+          <button id="tab-login-petugas" onclick="window.app.switchAuthTab('petugas')" class="py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5">
+            <i data-lucide="user-check" class="w-4 h-4"></i>
+            Petugas / OPD
+          </button>
+          <button id="tab-login-admin" onclick="window.app.switchAuthTab('admin')" class="py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            Admin BPKAD
+          </button>
+        </div>
+
+        <!-- Form Login Petugas OPD (Database Table `petugas_bmd`) -->
+        <form id="form-login-petugas" onsubmit="window.app.handleLoginPetugas(event)" class="space-y-4">
+          <div class="p-3 rounded-xl bg-indigo-50/80 border border-indigo-100 text-xs text-indigo-900 font-medium">
+            Masuk sebagai <strong>Pengurus Barang OPD / Tim Sensus</strong> menggunakan NIP/Username yang terdaftar di tabel <code class="font-bold">petugas_bmd</code>.
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">NIP / Username Petugas</label>
+            <div class="relative">
+              <i data-lucide="id-card" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="text" id="login-petugas-nip" required placeholder="Contoh: 199001012020121001" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Kata Sandi</label>
+            <div class="relative">
+              <i data-lucide="lock" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="password" id="login-petugas-pass" required placeholder="••••••••" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+            </div>
+          </div>
+          <button type="submit" id="btn-submit-petugas" class="btn-3d-coral w-full py-3 text-sm flex items-center justify-center gap-2">
+            <i data-lucide="log-in" class="w-4 h-4"></i>
+            <span>Masuk Dashboard OPD</span>
+          </button>
+        </form>
+
+        <!-- Form Login Admin BPKAD (Supabase Auth) -->
+        <form id="form-login-admin" onsubmit="window.app.handleLoginAdmin(event)" class="space-y-4 hidden">
+          <div class="p-3 rounded-xl bg-emerald-50/80 border border-emerald-100 text-xs text-emerald-900 font-medium">
+            Masuk sebagai <strong>Administrator Utama BPKAD</strong> menggunakan kredensial resmi <strong>Supabase Auth</strong>.
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Admin BPKAD</label>
+            <div class="relative">
+              <i data-lucide="mail" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="email" id="login-admin-email" required placeholder="admin@bpkad.go.id" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password Supabase Auth</label>
+            <div class="relative">
+              <i data-lucide="key-round" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+              <input type="password" id="login-admin-pass" required placeholder="••••••••" class="input-3d-recessed w-full pl-10 pr-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800" />
+            </div>
+          </div>
+          <button type="submit" id="btn-submit-admin" class="btn-3d-primary w-full py-3 text-sm flex items-center justify-center gap-2">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            <span>Masuk sebagai Admin BPKAD</span>
+          </button>
+        </form>
+
+        <!-- Quick Preview Access Card (Hanya tampil saat IS_PREVIEW = true) -->
+        <div id="auth-preview-shortcuts" class="hidden mt-6 pt-5 border-t border-slate-200">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-3">Pintasan Mode Preview (Tanpa Ketik)</p>
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="window.app.quickLogin('admin')" class="btn-3d-white py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+              Demo Admin BPKAD
+            </button>
+            <button type="button" onclick="window.app.quickLogin('petugas')" class="btn-3d-white py-2 px-3 text-xs flex items-center justify-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              Demo Petugas OPD
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MAIN APPLICATION SHELL (TASKHIVE 3D DASHBOARD)
+         ====================================================================== -->
+    <div id="main-shell" class="hidden flex-1 flex overflow-hidden relative">
+      
+      <!-- 1. FIXED LEFT SIDEBAR (DESKTOP) -->
+      <aside id="desktop-sidebar" class="sidebar-3d-dark w-64 flex-shrink-0 hidden lg:flex flex-col justify-between select-none z-30 transition-all duration-300">
+        <div class="p-5 overflow-y-auto flex-1">
+          <!-- Brand Logo TaskHive 3D Style -->
+          <div class="flex items-center gap-3 mb-7 px-1">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-500 via-purple-500 to-amber-400 p-0.5 shadow-lg shadow-rose-500/30">
+              <div class="w-full h-full bg-slate-900 rounded-[14px] flex items-center justify-center">
+                <i data-lucide="cuboid" class="w-6 h-6 text-rose-400"></i>
+              </div>
+            </div>
+            <div>
+              <h2 class="text-white font-extrabold text-lg leading-none tracking-tight">SIMBMD <span class="text-rose-400">3D</span></h2>
+              <p class="text-[11px] text-slate-400 font-medium mt-1">Plan. Track. Verify.</p>
+            </div>
+          </div>
+
+          <!-- Primary Dashboard Button -->
+          <div class="mb-6">
+            <button onclick="window.app.navigate('dashboard')" data-nav="dashboard" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold nav-pill-3d-active">
+              <i data-lucide="home" class="w-4 h-4"></i>
+              <span>Dashboard</span>
+            </button>
+          </div>
+
+          <!-- Category: MANAJEMEN ASET BMD -->
+          <div class="mb-6">
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Manajemen Aset BMD</p>
+            <nav class="space-y-1.5">
+              <button onclick="window.app.navigate('kib')" data-nav="kib" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+                  <span>Data Master Aset (KIB)</span>
+                </span>
+                <span id="sidebar-count-aset" class="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-slate-300">0</span>
+              </button>
+
+              <button onclick="window.app.navigate('sensus')" data-nav="sensus" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+                  <span>Sensus & Cek Fisik</span>
+                </span>
+                <span id="sidebar-count-sensus" class="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-slate-300">0</span>
+              </button>
+
+              <button onclick="window.app.navigate('mutasi')" data-nav="mutasi" class="nav-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <span class="flex items-center gap-3">
+                  <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+                  <span>Mutasi & Penghapusan</span>
+                </span>
+                <span id="sidebar-count-mutasi" class="px-2 py-0.5 rounded-full text-[10px] bg-white/10 text-slate-300">0</span>
+              </button>
+            </nav>
+          </div>
+
+          <!-- Category: KARTU INVENTARIS (FILTER CEPAT KIB) -->
+          <div class="mb-6">
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Pintasan Kategori KIB</p>
+            <div class="space-y-1">
+              <button onclick="window.app.openKibCategory('KIB A - Tanah')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
+                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
+                <span>KIB A — Tanah</span>
+              </button>
+              <button onclick="window.app.openKibCategory('KIB B - Peralatan & Mesin')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
+                <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                <span>KIB B — Peralatan & Mesin</span>
+              </button>
+              <button onclick="window.app.openKibCategory('KIB C - Gedung & Bangunan')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>KIB C — Gedung & Bangunan</span>
+              </button>
+              <button onclick="window.app.openKibCategory('KIB D - Jalan, Irigasi & Jaringan')" class="w-full flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span>KIB D — Jalan & Irigasi</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Category: PENGATURAN & OTORITAS (ADMIN ONLY) -->
+          <div id="sidebar-admin-group" class="mb-4">
+            <p class="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-2.5">Pengaturan & Otoritas</p>
+            <nav class="space-y-1.5">
+              <button onclick="window.app.navigate('opd')" data-nav="opd" class="nav-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold nav-pill-3d-inactive">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+                <span>Master OPD & Petugas</span>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Bottom 3D Promo / Sensus Action Box (Sesuai Referensi TaskHive) -->
+        <div class="p-4">
+          <div class="rounded-2xl p-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 border border-indigo-500/30 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-fuchsia-500/20 rounded-full blur-xl pointer-events-none"></div>
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <div>
+                <h4 class="text-xs font-extrabold text-white">Sensus BMD 2026</h4>
+                <p class="text-[11px] text-indigo-200 mt-0.5 leading-snug">Pastikan seluruh aset OPD terverifikasi fisik & berlabel QR.</p>
+              </div>
+              <div class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 flex-shrink-0">
+                <i data-lucide="rocket" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <button onclick="window.app.openModalSensus()" class="mt-2 w-full py-2 px-3 rounded-xl text-xs font-extrabold text-white bg-gradient-to-r from-fuchsia-500 to-indigo-500 hover:from-fuchsia-400 hover:to-indigo-400 shadow-lg shadow-fuchsia-500/30 border-b-2 border-indigo-900 flex items-center justify-center gap-1.5 transition">
+              <span>Input Cek Fisik</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 2. MAIN CONTENT COLUMN -->
+      <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <!-- TOP UTILITY HEADER BAR (TASKHIVE 3D STYLE) -->
+        <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 z-20">
+          <!-- Left: Sidebar Toggle & 3D Recessed Search Bar -->
+          <div class="flex items-center gap-3 flex-1 max-w-xl">
+            <button onclick="window.app.toggleSidebar()" class="btn-3d-white w-10 h-10 flex items-center justify-center text-slate-600 flex-shrink-0" title="Toggle Menu">
+              <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+
+            <div class="input-3d-recessed flex items-center gap-2.5 px-3.5 py-2 rounded-full w-full max-w-md">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 flex-shrink-0"></i>
+              <input id="global-search-input" oninput="window.app.handleGlobalSearch(this.value)" type="text" placeholder="Cari aset BMD, kode barang, merk, atau OPD..." class="bg-transparent border-none outline-none text-xs sm:text-sm font-medium text-slate-700 w-full placeholder:text-slate-400" />
+              <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold text-slate-400 bg-white rounded-md border border-slate-200 shadow-sm">⌘K</span>
+            </div>
+          </div>
+
+          <!-- Right: Date Filter, Notification 3D Bell & User Profile -->
+          <div class="flex items-center gap-2.5 sm:gap-3.5">
+            <!-- Tahun Anggaran / Periode Selector -->
+            <div class="hidden md:flex items-center gap-2 btn-3d-white px-3.5 py-2 text-xs font-bold text-slate-700">
+              <i data-lucide="calendar" class="w-4 h-4 text-indigo-600"></i>
+              <select id="filter-tahun-global" onchange="window.app.renderAll()" class="bg-transparent outline-none cursor-pointer font-bold text-slate-700">
+                <option value="ALL">Semua Tahun Perolehan</option>
+                <option value="2026">TA 2026 ( berjalan )</option>
+                <option value="2025">TA 2025</option>
+                <option value="2024">TA 2024</option>
+                <option value="2023">TA 2023 & Sebelumnya</option>
+              </select>
+            </div>
+
+            <!-- Notification Button with 3D Red Count Badge -->
+            <button onclick="window.app.navigate('mutasi')" class="btn-3d-white w-10 h-10 flex items-center justify-center relative" title="Usulan Mutasi & Notifikasi">
+              <i data-lucide="bell" class="w-4 h-4 text-slate-700"></i>
+              <span id="notif-badge-count" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-white shadow">0</span>
+            </button>
+
+            <!-- User Profile & Logout Pill -->
+            <div class="flex items-center gap-2.5 pl-2 border-l border-slate-200">
+              <div id="user-avatar-box" class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-500 text-white font-extrabold text-xs flex items-center justify-center shadow-md border-2 border-white">
+                AD
+              </div>
+              <div class="hidden sm:block text-left leading-tight">
+                <p id="user-display-name" class="text-xs font-extrabold text-slate-900">Alex Morgan</p>
+                <p id="user-display-role" class="text-[11px] font-semibold text-slate-500">Admin BPKAD</p>
+              </div>
+              <button onclick="window.app.handleLogout()" class="btn-3d-white px-2.5 py-2 text-xs text-rose-600 hover:bg-rose-50 ml-1" title="Keluar / Logout">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- SCROLLABLE PAGE VIEWPORT -->
+        <main id="page-viewport" class="flex-1 overflow-y-auto p-4 sm:p-6 pb-28 lg:pb-8 space-y-6">
+          
+          <!-- ================================================================
+               VIEW 1: DASHBOARD EKSEKUTIF (TASKHIVE 3D LAYOUT)
+               ================================================================ -->
+          <section id="view-dashboard" class="space-y-6">
+            <!-- Row 1: Hero Greeting & Primary 3D Action Buttons -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h1 id="hero-greeting" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  Selamat Pagi, Pengelola BMD! 👋
+                </h1>
+                <p id="hero-subtitle" class="text-xs sm:text-sm font-medium text-slate-500 mt-1">
+                  Pantau nilai perolehan, kondisi fisik KIB, dan ketertiban inventarisasi Barang Milik Daerah secara real-time.
+                </p>
+              </div>
+              <div class="flex items-center gap-3 self-start sm:self-auto">
+                <button onclick="window.app.exportCSV()" class="btn-3d-white px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
+                  <i data-lucide="download" class="w-4 h-4 text-slate-700"></i>
+                  <span>Export Report</span>
+                </button>
+                <button onclick="window.app.openModalAset()" class="btn-3d-primary px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                  <span>Tambah Aset BMD</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Row 2: 4-Column 3D KPI Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+              <!-- KPI 1: Total Aset BMD (Purple 3D) -->
+              <div class="card-3d card-3d-hover p-5">
+                <div class="flex items-center gap-4">
+                  <div class="icon-box-3d icon-3d-purple">
+                    <i data-lucide="briefcase" class="w-6 h-6"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-500">Total Aset BMD</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                      <h3 id="kpi-total-aset" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h3>
+                      <span class="badge-3d bg-emerald-100 text-emerald-700">↑ Terdata</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="kpi-aset-ada">0 Ada Fisik</span>
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                    <span id="kpi-aset-hilang">0 Belum Ditemukan</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- KPI 2: Total Sensus & Cek Fisik (Blue 3D) -->
+              <div class="card-3d card-3d-hover p-5">
+                <div class="flex items-center gap-4">
+                  <div class="icon-box-3d icon-3d-blue">
+                    <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-500">Sensus & BAP Fisik</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                      <h3 id="kpi-total-sensus" class="text-2xl sm:text-3xl font-extrabold text-slate-900">0</h3>
+                      <span class="badge-3d bg-blue-100 text-blue-700">↑ Aktif</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-600">
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span id="kpi-kondisi-baik">0 Kondisi Baik</span>
+                  </span>
+                  <span class="flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span id="kpi-kondisi-rusak">0 Rusak</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- KPI 3: Total Nilai Perolehan BMD (Emerald 3D) -->
+              <div class="card-3d card-3d-hover p-5">
+                <div class="flex items-center gap-4">
+                  <div class="icon-box-3d icon-3d-emerald">
+                    <i data-lucide="circle-dollar-sign" class="w-6 h-6"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-500">Total Nilai Perolehan</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                      <h3 id="kpi-total-nilai" class="text-xl sm:text-2xl font-extrabold text-slate-900 truncate">Rp 0</h3>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                  <span>Akumulasi Nilai Neraca KIB</span>
+                  <span class="text-emerald-600 font-bold">100% Valid</span>
+                </div>
+              </div>
+
+              <!-- KPI 4: OPD & Usulan Mutasi (Amber 3D) -->
+              <div class="card-3d card-3d-hover p-5">
+                <div class="flex items-center gap-4">
+                  <div class="icon-box-3d icon-3d-amber">
+                    <i data-lucide="clock" class="w-6 h-6"></i>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-500">Kesehatan Aset Daerah</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                      <h3 id="kpi-health-rate" class="text-2xl sm:text-3xl font-extrabold text-slate-900">100%</h3>
+                      <span class="badge-3d bg-emerald-100 text-emerald-700">Kelayakan</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+                  <span id="kpi-opd-count">0 Unit OPD Aktif</span>
+                  <span id="kpi-mutasi-pending" class="text-amber-600 font-bold">0 Usul Mutasi</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 3: 3-Column Analytics Grid (Line Chart, Donut Chart, OPD Progress Bars) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <!-- Chart 1: Sebaran Nilai & Item per Kategori KIB (Area Line Chart) -->
+              <div class="card-3d p-5 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Ikhtisar Kategori KIB</h3>
+                    <p class="text-xs font-medium text-slate-400">Distribusi aset per Kartu Inventaris Barang</p>
+                  </div>
+                  <span class="btn-3d-white px-2.5 py-1 text-[11px] font-bold">KIB A – E</span>
+                </div>
+                <div class="relative h-56 w-full">
+                  <canvas id="chart-kib-overview"></canvas>
+                </div>
+              </div>
+
+              <!-- Chart 2: Aset Berdasarkan Kondisi Fisik (3D Donut with Center Total) -->
+              <div class="card-3d p-5 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Aset Berdasarkan Kondisi</h3>
+                    <p class="text-xs font-medium text-slate-400">Proporsi hasil cek fisik lapangan</p>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 items-center gap-4 my-auto">
+                  <div class="relative h-48 flex items-center justify-center">
+                    <canvas id="chart-kondisi-donut"></canvas>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <span id="donut-center-number" class="text-2xl font-extrabold text-slate-900">0</span>
+                      <span class="text-[11px] font-bold text-slate-400">Total Aset</span>
+                    </div>
+                  </div>
+                  <div id="donut-legend-box" class="space-y-2.5 text-xs">
+                    <!-- Diisi via JS -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chart 3: Distribusi Aset per OPD (Horizontal 3D Progress Bars) -->
+              <div class="card-3d p-5 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Rekapitulasi Aset per OPD</h3>
+                    <p class="text-xs font-medium text-slate-400">Unit Kerja pengelola BMD terbesar</p>
+                  </div>
+                  <button onclick="window.app.navigate('opd')" class="btn-3d-white px-2.5 py-1 text-[11px] font-bold">Semua OPD</button>
+                </div>
+                <div id="opd-progress-list" class="space-y-4 my-auto">
+                  <!-- Diisi via JS -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Row 4: Full-Width 3D Data Table (Recent BMD Assets) -->
+            <div class="card-3d p-5 sm:p-6">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                  <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Daftar Inventaris BMD Terbaru</h3>
+                  <p class="text-xs font-medium text-slate-400">Klik tombol mata (lihat/QR) untuk mencetak label QR inventarisasi</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5">
+                  <div class="input-3d-recessed flex items-center gap-2 px-3 py-1.5 rounded-xl">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <input type="text" oninput="window.app.filterDashboardTable(this.value)" placeholder="Cari nama/kode..." class="bg-transparent outline-none text-xs font-semibold text-slate-700 w-36 sm:w-44" />
+                  </div>
+                  <select id="dash-filter-kondisi" onchange="window.app.renderDashboardTable()" class="btn-3d-white px-3 py-1.5 text-xs font-bold outline-none">
+                    <option value="ALL">Semua Kondisi</option>
+                    <option value="Baik">Baik</option>
+                    <option value="Rusak Ringan">Rusak Ringan</option>
+                    <option value="Rusak Berat">Rusak Berat</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                      <th class="pb-3 pl-2">Nama Barang & Kode</th>
+                      <th class="pb-3">OPD Pengguna</th>
+                      <th class="pb-3">Tahun & Nilai</th>
+                      <th class="pb-3">Kelengkapan Sensus</th>
+                      <th class="pb-3">Kondisi</th>
+                      <th class="pb-3">Keberadaan</th>
+                      <th class="pb-3 text-right pr-2">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                    <!-- Diisi via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================
+               VIEW 2: DATA MASTER ASET (KIB A s/d E)
+               ================================================================ -->
+          <section id="view-kib" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Data Master Aset BMD (Kartu Inventaris Barang)</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola data rincian KIB A, KIB B, KIB C, KIB D, dan KIB E beserta label QR inventaris.</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <button onclick="window.app.exportCSV()" class="btn-3d-white px-3.5 py-2.5 text-xs flex items-center gap-1.5">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4 text-emerald-600"></i>
+                  <span>Unduh CSV KIB</span>
+                </button>
+                <button onclick="window.app.openModalAset()" class="btn-3d-primary px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2">
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                  <span>Tambah Aset Baru</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter Pill Bar KIB -->
+            <div class="card-3d p-4 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap items-center gap-2" id="kib-category-pills">
+                <button onclick="window.app.setKibFilter('ALL')" data-kib="ALL" class="kib-pill btn-3d-primary px-3.5 py-1.5 text-xs">Semua KIB</button>
+                <button onclick="window.app.setKibFilter('KIB A - Tanah')" data-kib="KIB A - Tanah" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB A (Tanah)</button>
+                <button onclick="window.app.setKibFilter('KIB B - Peralatan & Mesin')" data-kib="KIB B - Peralatan & Mesin" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB B (Peralatan & Mesin)</button>
+                <button onclick="window.app.setKibFilter('KIB C - Gedung & Bangunan')" data-kib="KIB C - Gedung & Bangunan" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB C (Gedung & Bangunan)</button>
+                <button onclick="window.app.setKibFilter('KIB D - Jalan, Irigasi & Jaringan')" data-kib="KIB D - Jalan, Irigasi & Jaringan" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB D (Jalan & Irigasi)</button>
+                <button onclick="window.app.setKibFilter('KIB E - Aset Tetap Lainnya')" data-kib="KIB E - Aset Tetap Lainnya" class="kib-pill btn-3d-white px-3.5 py-1.5 text-xs">KIB E (Aset Lainnya)</button>
+              </div>
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <select id="kib-filter-opd" onchange="window.app.renderKibView()" class="btn-3d-white px-3 py-2 text-xs font-bold outline-none w-full sm:w-auto">
+                  <option value="ALL">Semua OPD</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tabel Master KIB -->
+            <div class="card-3d p-5 overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    <th class="pb-3 pl-2">Kode & Nama Barang</th>
+                    <th class="pb-3">Kategori KIB & Merk</th>
+                    <th class="pb-3">OPD & Lokasi Ruangan</th>
+                    <th class="pb-3">Tahun / Nilai (Rp)</th>
+                    <th class="pb-3">Kondisi & Status</th>
+                    <th class="pb-3 text-right pr-2">Tindakan</th>
+                  </tr>
+                </thead>
+                <tbody id="kib-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                  <!-- Diisi via JS -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- ================================================================
+               VIEW 3: SENSUS & CEK FISIK (INVENTARISASI LAPANGAN)
+               ================================================================ -->
+          <section id="view-sensus" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Sensus & Pemeriksaan Fisik BMD</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Catat Berita Acara Pemeriksaan (BAP) fisik barang dan sinkronkan kondisi terkini ke master KIB.</p>
+              </div>
+              <button onclick="window.app.openModalSensus()" class="btn-3d-coral px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2 self-start sm:self-auto">
+                <i data-lucide="scan-line" class="w-4 h-4"></i>
+                <span>Input BAP Cek Fisik Baru</span>
+              </button>
+            </div>
+
+            <div class="card-3d p-5 overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    <th class="pb-3 pl-2">Nomor BAP & Tanggal</th>
+                    <th class="pb-3">Aset BMD Diperiksa</th>
+                    <th class="pb-3">Petugas Pemeriksa</th>
+                    <th class="pb-3">Perubahan Kondisi</th>
+                    <th class="pb-3">Keberadaan Fisik</th>
+                    <th class="pb-3">Catatan Lapangan</th>
+                    <th class="pb-3 text-right pr-2">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="sensus-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                  <!-- Diisi via JS -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- ================================================================
+               VIEW 4: MUTASI & PENGHAPUSAN BMD
+               ================================================================ -->
+          <section id="view-mutasi" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Mutasi Antar OPD & Usulan Penghapusan</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola perpindahan barang antar ruangan/OPD serta verifikasi SK penghapusan aset rusak berat.</p>
+              </div>
+              <button onclick="window.app.openModalMutasi()" class="btn-3d-primary px-4 py-2.5 text-xs sm:text-sm flex items-center gap-2 self-start sm:self-auto">
+                <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+                <span>Ajukan Mutasi / Penghapusan</span>
+              </button>
+            </div>
+
+            <div class="card-3d p-5 overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+                    <th class="pb-3 pl-2">Tanggal & No. SK/Dokumen</th>
+                    <th class="pb-3">Aset BMD</th>
+                    <th class="pb-3">Jenis Pengajuan</th>
+                    <th class="pb-3">OPD Asal → Tujuan</th>
+                    <th class="pb-3">Status Persetujuan</th>
+                    <th class="pb-3 text-right pr-2">Otorisasi / Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="mutasi-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm">
+                  <!-- Diisi via JS -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- ================================================================
+               VIEW 5: MASTER OPD & PETUGAS PENGURUS BARANG (KHUSUS ADMIN)
+               ================================================================ -->
+          <section id="view-opd" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Master OPD & Akun Pengurus Barang</h2>
+                <p class="text-xs sm:text-sm font-medium text-slate-500">Kelola daftar Organisasi Perangkat Daerah (`master_opd`) dan kredensial login petugas (`petugas_bmd`).</p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <button onclick="window.app.openModalOpd()" class="btn-3d-white px-4 py-2.5 text-xs font-extrabold flex items-center gap-2">
+                  <i data-lucide="building" class="w-4 h-4 text-indigo-600"></i>
+                  <span>+ Tambah OPD</span>
+                </button>
+                <button onclick="window.app.openModalPetugas()" class="btn-3d-primary px-4 py-2.5 text-xs font-extrabold flex items-center gap-2">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>
+                  <span>+ Tambah Petugas OPD</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Tabel Master OPD -->
+              <div class="card-3d p-5">
+                <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                  <i data-lucide="building-2" class="w-5 h-5 text-indigo-600"></i>
+                  <span>Daftar Unit Kerja / OPD (`master_opd`)</span>
+                </h3>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-400">
+                        <th class="pb-2.5">Kode & Nama OPD</th>
+                        <th class="pb-2.5">Kepala OPD / Pengguna</th>
+                        <th class="pb-2.5 text-right">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="opd-table-body" class="divide-y divide-slate-100 text-xs">
+                      <!-- Diisi via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Tabel Petugas BMD (Hybrid Login Users) -->
+              <div class="card-3d p-5">
+                <h3 class="text-base font-extrabold text-slate-900 mb-4 flex items-center gap-2">
+                  <i data-lucide="users" class="w-5 h-5 text-rose-500"></i>
+                  <span>Akun Pengurus Barang (`petugas_bmd`)</span>
+                </h3>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-400">
+                        <th class="pb-2.5">Nama & NIP/Username</th>
+                        <th class="pb-2.5">OPD & Jabatan</th>
+                        <th class="pb-2.5">Status</th>
+                        <th class="pb-2.5 text-right">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody id="petugas-table-body" class="divide-y divide-slate-100 text-xs">
+                      <!-- Diisi via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </main>
+
+        <!-- FLOATING 3D BOTTOM NAVIGATION BAR (MOBILE / TABLET) -->
+        <nav class="lg:hidden fixed bottom-3 inset-x-3 rounded-2xl sidebar-3d-dark p-2 flex items-center justify-around z-40 border border-white/15 shadow-2xl">
+          <button onclick="window.app.navigate('dashboard')" data-nav="dashboard" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-active">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>Dashboard</span>
+          </button>
+          <button onclick="window.app.navigate('kib')" data-nav="kib" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+            <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+            <span>Master KIB</span>
+          </button>
+          <button onclick="window.app.navigate('sensus')" data-nav="sensus" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            <span>Sensus</span>
+          </button>
+          <button onclick="window.app.navigate('mutasi')" data-nav="mutasi" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+            <i data-lucide="arrow-left-right" class="w-4 h-4"></i>
+            <span>Mutasi</span>
+          </button>
+          <button id="mobile-nav-opd" onclick="window.app.navigate('opd')" data-nav="opd" class="nav-btn flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-bold nav-pill-3d-inactive">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+            <span>OPD</span>
+          </button>
+        </nav>
+
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 1: FORM TAMBAH / EDIT ASET BMD (`aset_bmd`)
+         ====================================================================== -->
+    <div id="modal-aset" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="card-3d w-full max-w-2xl p-6 my-8 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="icon-box-3d icon-3d-purple w-10 h-10">
+              <i data-lucide="package-plus" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 id="modal-aset-title" class="text-lg font-extrabold text-slate-900">Tambah Aset BMD Baru</h3>
+              <p class="text-xs text-slate-500">Data tersimpan ke tabel <code class="font-bold">aset_bmd</code></p>
+            </div>
+          </div>
+          <button onclick="window.app.closeModal('modal-aset')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form id="form-aset" onsubmit="window.app.saveAset(event)" class="space-y-4">
+          <input type="hidden" id="aset-id" />
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Kode Barang Permendagri</label>
+              <input type="text" id="aset-kode" required placeholder="1.3.2.05.01.05.001" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">NUP (No. Urut Pendaftaran)</label>
+              <input type="number" id="aset-nup" required placeholder="1" min="1" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Kategori KIB</label>
+              <select id="aset-kib" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="KIB A - Tanah">KIB A - Tanah</option>
+                <option value="KIB B - Peralatan & Mesin" selected>KIB B - Peralatan & Mesin</option>
+                <option value="KIB C - Gedung & Bangunan">KIB C - Gedung & Bangunan</option>
+                <option value="KIB D - Jalan, Irigasi & Jaringan">KIB D - Jalan, Irigasi & Jaringan</option>
+                <option value="KIB E - Aset Tetap Lainnya">KIB E - Aset Tetap Lainnya</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nama / Jenis Barang BMD</label>
+              <input type="text" id="aset-nama" required placeholder="Contoh: Laptop Workstation / Kendaraan Dinas" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Merk / Tipe / Spesifikasi</label>
+              <input type="text" id="aset-merk" required placeholder="Contoh: Toyota Innova Zenix / MacBook Pro M3" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Tahun Perolehan</label>
+              <input type="number" id="aset-tahun" required value="2026" min="1980" max="2030" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nilai Perolehan (Rp)</label>
+              <input type="number" id="aset-nilai" required placeholder="25000000" min="0" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Unit Kerja / OPD Pengguna</label>
+              <select id="aset-opd" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Kondisi Fisik</label>
+              <select id="aset-kondisi" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="Baik">Baik</option>
+                <option value="Rusak Ringan">Rusak Ringan</option>
+                <option value="Rusak Berat">Rusak Berat</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Status Keberadaan</label>
+              <select id="aset-keberadaan" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="Ada">Ada</option>
+                <option value="Tidak Ditemukan">Tidak Ditemukan</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Lokasi / Ruangan</label>
+              <input type="text" id="aset-ruangan" required placeholder="R. Bidang Aset" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Pemegang Barang</label>
+              <input type="text" id="aset-pemegang" required placeholder="Nama Pegawai" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Keterangan / Nomor Sertifikat / BPKB</label>
+            <input type="text" id="aset-ket" placeholder="Nomor rangka, nomor sertifikat tanah, atau catatan tambahan..." class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onclick="window.app.closeModal('modal-aset')" class="btn-3d-white px-4 py-2.5 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-primary px-5 py-2.5 text-xs flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Simpan Data BMD</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 2: FORM SENSUS & CEK FISIK (`log_inventarisasi`)
+         ====================================================================== -->
+    <div id="modal-sensus" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="card-3d w-full max-w-lg p-6 my-8 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="icon-box-3d icon-3d-blue w-10 h-10">
+              <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-900">Input BAP Sensus / Cek Fisik</h3>
+              <p class="text-xs text-slate-500">Otomatis mengupdate status kondisi pada Master Aset</p>
+            </div>
+          </div>
+          <button onclick="window.app.closeModal('modal-sensus')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form id="form-sensus" onsubmit="window.app.saveSensus(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Nomor BAP Pemeriksaan</label>
+              <input type="text" id="sensus-bap" required placeholder="BAP/BMD/2026/001" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Pemeriksaan</label>
+              <input type="date" id="sensus-tanggal" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Aset BMD yang Diperiksa</label>
+            <select id="sensus-aset-id" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Hasil Cek Kondisi Fisik Baru</label>
+              <select id="sensus-kondisi-baru" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="Baik">Baik</option>
+                <option value="Rusak Ringan">Rusak Ringan</option>
+                <option value="Rusak Berat">Rusak Berat</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Keberadaan Barang</label>
+              <select id="sensus-keberadaan" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="Ada">Ada (Ditemukan)</option>
+                <option value="Tidak Ditemukan">Tidak Ditemukan</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Petugas Pemeriksa</label>
+            <input type="text" id="sensus-petugas" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Catatan Temuan Lapangan</label>
+            <textarea id="sensus-catatan" rows="2" required placeholder="Contoh: Barang berfungsi normal dan stiker QR terpasang rapi." class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></textarea>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onclick="window.app.closeModal('modal-sensus')" class="btn-3d-white px-4 py-2.5 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-coral px-5 py-2.5 text-xs flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              <span>Simpan Hasil Sensus</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 3: FORM PENGAJUAN MUTASI / PENGHAPUSAN (`mutasi_bmd`)
+         ====================================================================== -->
+    <div id="modal-mutasi" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="card-3d w-full max-w-lg p-6 my-8 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="icon-box-3d icon-3d-amber w-10 h-10">
+              <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-extrabold text-slate-900">Pengajuan Mutasi / Penghapusan BMD</h3>
+              <p class="text-xs text-slate-500">Tersimpan ke tabel <code class="font-bold">mutasi_bmd</code></p>
+            </div>
+          </div>
+          <button onclick="window.app.closeModal('modal-mutasi')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <form id="form-mutasi" onsubmit="window.app.saveMutasi(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Aset BMD</label>
+            <select id="mutasi-aset-id" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></select>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Jenis Pengajuan</label>
+              <select id="mutasi-jenis" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold">
+                <option value="Pindah OPD">Mutasi Antar OPD</option>
+                <option value="Pindah Ruangan">Mutasi Antar Ruangan</option>
+                <option value="Usul Hapus">Usulan Penghapusan (Rusak Berat)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Tanggal Pengajuan</label>
+              <input type="date" id="mutasi-tanggal" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">OPD / Lokasi Asal</label>
+              <input type="text" id="mutasi-asal" required placeholder="Dinas Pendidikan" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">OPD Tujuan / Keterangan Hapus</label>
+              <input type="text" id="mutasi-tujuan" required placeholder="BPKAD / Pemusnahan Lelang" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nomor SK / Nota Dinas Pengajuan</label>
+            <input type="text" id="mutasi-sk" required placeholder="SK-MUT/BMD/2026/012" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+            <button type="button" onclick="window.app.closeModal('modal-mutasi')" class="btn-3d-white px-4 py-2.5 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-primary px-5 py-2.5 text-xs flex items-center gap-2">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Kirim Pengajuan</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 4: FORM MASTER OPD (`master_opd`)
+         ====================================================================== -->
+    <div id="modal-opd" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="card-3d w-full max-w-md p-6 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
+          <h3 class="text-lg font-extrabold text-slate-900">Tambah Unit Kerja / OPD</h3>
+          <button onclick="window.app.closeModal('modal-opd')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <form id="form-opd" onsubmit="window.app.saveOpd(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Kode OPD</label>
+            <input type="text" id="opd-kode" required placeholder="4.02.01" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama OPD / Instansi Daerah</label>
+            <input type="text" id="opd-nama" required placeholder="Badan Pengelola Keuangan dan Aset Daerah" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kepala OPD / Pengguna Barang</label>
+            <input type="text" id="opd-kepala" required placeholder="Drs. H. Ahmad Fauzi, M.Si" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+            <button type="button" onclick="window.app.closeModal('modal-opd')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-primary px-5 py-2 text-xs">Simpan OPD</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 5: FORM PETUGAS PENGURUS BARANG (`petugas_bmd`)
+         ====================================================================== -->
+    <div id="modal-petugas" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="card-3d w-full max-w-md p-6 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-5">
+          <h3 class="text-lg font-extrabold text-slate-900">Tambah Akun Pengurus Barang</h3>
+          <button onclick="window.app.closeModal('modal-petugas')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <form id="form-petugas" onsubmit="window.app.savePetugas(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">NIP / Username Login</label>
+            <input type="text" id="petugas-nip" required placeholder="199203152019031002" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Password Login</label>
+            <input type="text" id="petugas-password" required placeholder="bmd2026" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Petugas</label>
+            <input type="text" id="petugas-nama" required placeholder="Rizky Pratama, S.Ak" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Jabatan</label>
+              <input type="text" id="petugas-jabatan" required value="Pengurus Barang" class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Unit OPD</label>
+              <select id="petugas-opd" required class="input-3d-recessed w-full px-3.5 py-2 rounded-xl text-xs font-bold"></select>
+            </div>
+          </div>
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-200">
+            <button type="button" onclick="window.app.closeModal('modal-petugas')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
+            <button type="submit" class="btn-3d-primary px-5 py-2 text-xs">Simpan Akun</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL 6: DETAIL & CETAK LABEL QR INVENTARIS BMD
+         ====================================================================== -->
+    <div id="modal-qr" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="card-3d w-full max-w-md p-6 border-b-8 border-slate-300">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
+          <h3 class="text-base font-extrabold text-slate-900">Label QR Inventarisasi BMD</h3>
+          <button onclick="window.app.closeModal('modal-qr')" class="btn-3d-white w-9 h-9 flex items-center justify-center">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div id="printable-area" class="border-2 border-slate-900 rounded-2xl p-4 bg-white">
+          <div class="flex items-center justify-between border-b-2 border-slate-900 pb-2 mb-3">
+            <div>
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Pemerintah Daerah — Kartu Label BMD</p>
+              <h4 id="qr-opd-name" class="text-xs font-extrabold text-slate-900">BPKAD</h4>
+            </div>
+            <span id="qr-tahun" class="px-2 py-0.5 bg-slate-900 text-white rounded text-xs font-extrabold">2026</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <div id="qr-svg-box" class="w-24 h-24 border border-slate-300 rounded-xl p-1.5 flex items-center justify-center flex-shrink-0 bg-slate-50">
+              <!-- SVG QR Matrix -->
+            </div>
+            <div class="text-xs space-y-1 min-w-0 flex-1">
+              <p class="font-mono font-extrabold text-slate-900 text-xs truncate" id="qr-kode-nup">1.3.2.05.01 - NUP #1</p>
+              <p class="font-extrabold text-slate-800 text-sm leading-tight" id="qr-nama-barang">Laptop Dinas</p>
+              <p class="text-slate-500 text-[11px]" id="qr-merk">Merk/Tipe</p>
+              <div class="pt-1 flex items-center gap-2 text-[11px] font-bold">
+                <span id="qr-kondisi" class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Baik</span>
+                <span id="qr-ruangan" class="text-slate-600 truncate">Ruang Aset</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 mt-5">
+          <button onclick="window.app.closeModal('modal-qr')" class="btn-3d-white px-4 py-2 text-xs">Tutup</button>
+          <button onclick="window.print()" class="btn-3d-primary px-4 py-2 text-xs flex items-center gap-1.5">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Cetak Stiker QR</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================================
+         MODAL KONFIRMASI HAPUS CUSTOM (TANPA window.confirm)
+         ====================================================================== -->
+    <div id="modal-confirm" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="card-3d w-full max-w-sm p-6 text-center border-b-8 border-rose-200">
+        <div class="icon-box-3d icon-3d-rose mx-auto mb-3">
+          <i data-lucide="trash-2" class="w-6 h-6"></i>
+        </div>
+        <h4 class="text-base font-extrabold text-slate-900">Konfirmasi Penghapusan Data</h4>
+        <p id="confirm-message" class="text-xs font-medium text-slate-500 mt-1 mb-5">Apakah Anda yakin ingin menghapus data ini secara permanen?</p>
+        <div class="flex items-center justify-center gap-3">
+          <button onclick="window.app.closeModal('modal-confirm')" class="btn-3d-white px-4 py-2 text-xs">Batal</button>
+          <button id="btn-confirm-yes" class="btn-3d-coral px-5 py-2 text-xs">Ya, Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[9999999] space-y-2 pointer-events-none"></div>
+  </div>
+
+  <!-- ========================================================================
+       MODUL UTAMA JAVASCRIPT (KONFIGURASI SUPABASE, HYBRID AUTH, & 3D ENGINE)
+       ======================================================================== -->
+  <script type="module">
+    // KONFIGURASI APLIKASI
+    const IS_PREVIEW = true; // Ubah menjadi false SAAT DEPLOY agar mode preview & data dummy hilang dan terhubung 100% ke Supabase
+    const SUPABASE_URL = "URL_SUPABASE_ANDA";
+    const SUPABASE_ANON_KEY = "ANON_KEY_ANDA";
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // Inisialisasi klien Supabase hanya ketika IS_PREVIEW = false
+    const supabase = !IS_PREVIEW ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    // Registrasi Service Worker Dinamis via Blob untuk PWA 1 File
+    if ('serviceWorker' in navigator) {
+      const swCode = `
+        self.addEventListener('install', (e) => self.skipWaiting());
+        self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
+        self.addEventListener('fetch', (e) => {});
+      `;
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+    }
+
+    // State Aplikasi
+    const state = {
+      currentUser: null, // { id, name, role: 'admin' | 'petugas', opd_id, jabatan }
+      activeView: 'dashboard',
+      kibCategoryFilter: 'ALL',
+      dashboardSearchQuery: '',
+      globalSearchQuery: '',
+      master_opd: [],
+      petugas_bmd: [],
+      aset_bmd: [],
+      log_inventarisasi: [],
+      mutasi_bmd: [],
+      charts: {
+        kibOverview: null,
+        kondisiDonut: null
+      }
+    };
+
+    // Data Dummy Minimalis (Maksimal 2 baris per tabel, HANYA dipakai jika IS_PREVIEW === true)
+    function initPreviewDummyData() {
+      state.master_opd = [
+        {
+          id: 'opd-1',
+          kode_opd: '5.02.01',
+          nama_opd: 'BPKAD (Bidang Pengelolaan BMD)',
+          kepala_opd: 'Dr. H. Hendra Wijaya, M.Si',
+          created_at: '2026-01-10T08:00:00Z'
+        },
+        {
+          id: 'opd-2',
+          kode_opd: '1.01.01',
+          nama_opd: 'Dinas Pendidikan & Kebudayaan',
+          kepala_opd: 'Dra. Siti Rahmawati, M.Pd',
+          created_at: '2026-01-12T08:00:00Z'
+        }
+      ];
+
+      state.petugas_bmd = [
+        {
+          id: 'ptg-1',
+          nip_username: '199001012020121001',
+          password: '123',
+          nama_lengkap: 'Budi Santoso, S.Tr.Ak',
+          jabatan: 'Pengurus Barang Pengguna',
+          opd_id: 'opd-1',
+          status_aktif: true
+        },
+        {
+          id: 'ptg-2',
+          nip_username: '199405122022032004',
+          password: '123',
+          nama_lengkap: 'Nadia Putri, A.Md',
+          jabatan: 'Pembantu Pengurus Barang',
+          opd_id: 'opd-2',
+          status_aktif: true
+        }
+      ];
+
+      state.aset_bmd = [
+        {
+          id: 'ast-1',
+          kode_barang: '1.3.2.02.01.01.001',
+          nup: 1,
+          nama_barang: 'Kendaraan Dinas Operasional Kijang Innova Zenix',
+          kategori_kib: 'KIB B - Peralatan & Mesin',
+          merk_tipe: 'Toyota Zenix 2.0 Hybrid Q',
+          tahun_perolehan: 2026,
+          nilai_perolehan: 615000000,
+          kondisi: 'Baik',
+          status_keberadaan: 'Ada',
+          ruangan_lokasi: 'Pool Kendaraan BPKAD',
+          pemegang_barang: 'Budi Santoso, S.Tr.Ak',
+          opd_id: 'opd-1',
+          keterangan: 'BPKB No. M-09823412 / Plat Merah DN 1234 A',
+          updated_at: '2026-05-16T09:00:00Z'
+        },
+        {
+          id: 'ast-2',
+          kode_barang: '1.3.3.01.01.01.002',
+          nup: 2,
+          nama_barang: 'Gedung Kantor Utama Layanan Pendidikan Terpadu',
+          kategori_kib: 'KIB C - Gedung & Bangunan',
+          merk_tipe: 'Beton Bertulang 3 Lantai (1.200 m2)',
+          tahun_perolehan: 2025,
+          nilai_perolehan: 4850000000,
+          kondisi: 'Rusak Ringan',
+          status_keberadaan: 'Ada',
+          ruangan_lokasi: 'Jl. Soekarno Hatta No. 14',
+          pemegang_barang: 'Nadia Putri, A.Md',
+          opd_id: 'opd-2',
+          keterangan: 'IMB 2025 / Perlu pengecatan ulang sayap timur',
+          updated_at: '2026-05-18T10:30:00Z'
+        }
+      ];
+
+      state.log_inventarisasi = [
+        {
+          id: 'log-1',
+          aset_id: 'ast-1',
+          tanggal_cek: '2026-05-16',
+          petugas_nama: 'Budi Santoso, S.Tr.Ak',
+          kondisi_awal: 'Baik',
+          kondisi_baru: 'Baik',
+          keberadaan: 'Ada',
+          catatan_lapangan: 'Fisik kendaraan prima, stiker barcode BMD terpasang di pilar pintu.',
+          nomor_bap: 'BAP/BMD/2026/001'
+        },
+        {
+          id: 'log-2',
+          aset_id: 'ast-2',
+          tanggal_cek: '2026-05-18',
+          petugas_nama: 'Nadia Putri, A.Md',
+          kondisi_awal: 'Baik',
+          kondisi_baru: 'Rusak Ringan',
+          keberadaan: 'Ada',
+          catatan_lapangan: 'Plafon lantai 2 mengalami rembesan air hujan ringan.',
+          nomor_bap: 'BAP/BMD/2026/002'
+        }
+      ];
+
+      state.mutasi_bmd = [
+        {
+          id: 'mut-1',
+          aset_id: 'ast-1',
+          jenis_mutasi: 'Pindah Ruangan',
+          opd_asal: 'Sekretariat BPKAD',
+          opd_tujuan: 'Bidang Aset Daerah BPKAD',
+          tanggal_mutasi: '2026-05-19',
+          nomor_sk: 'SK-BAST/BMD/2026/009',
+          status_persetujuan: 'Menunggu'
+        }
+      ];
+    }
+
+    // Utilitas Format Rupiah
+    function formatRupiah(num) {
+      const val = Number(num) || 0;
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR',
+        maximumFractionDigits: 0
+      }).format(val);
+    }
+
+    function formatRupiahSingkat(num) {
+      const val = Number(num) || 0;
+      if (val >= 1e9) return 'Rp ' + (val / 1e9).toFixed(2) + ' M';
+      if (val >= 1e6) return 'Rp ' + (val / 1e6).toFixed(1) + ' Jt';
+      return formatRupiah(val);
+    }
+
+    // Toast Notification 3D
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      const colorMap = {
+        success: 'from-emerald-500 to-teal-600 border-emerald-900',
+        error: 'from-rose-500 to-red-600 border-rose-900',
+        info: 'from-indigo-500 to-purple-600 border-indigo-900'
+      };
+      el.className = `pointer-events-auto px-4 py-3 rounded-2xl text-white text-xs font-extrabold shadow-xl bg-gradient-to-r ${colorMap[type] || colorMap.info} border-b-4 flex items-center gap-2.5 transition-all duration-300`;
+      el.innerHTML = `<span>✦</span><span>${message}</span>`;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(-8px)';
+        setTimeout(() => el.remove(), 300);
+      }, 3200);
+    }
+
+    // Generator SVG QR Code Deterministik
+    function generateQrSvg(text) {
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(i);
+        hash |= 0;
+      }
+      const size = 9;
+      let rects = '';
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const isCorner = (r < 2 && c < 2) || (r < 2 && c >= size - 2) || (r >= size - 2 && c < 2);
+          const bit = Math.abs((hash >> ((r * size + c) % 24)) & 1);
+          if (isCorner || bit === 1) {
+            rects += `<rect x="${c * 10}" y="${r * 10}" width="9" height="9" rx="2" fill="#0F172A"/>`;
+          }
+        }
+      }
+      return `<svg viewBox="0 0 90 90" class="w-full h-full">${rects}</svg>`;
+    }
+
+    // ========================================================================
+    // SUPABASE DATA FETCHING (SAAT IS_PREVIEW === false)
+    // ========================================================================
+    async function loadSupabaseData() {
+      if (IS_PREVIEW) return;
+      try {
+        const [opdRes, ptgRes, asetRes, logRes, mutRes] = await Promise.all([
+          supabase.from('master_opd').select('*').order('created_at', { ascending: true }),
+          supabase.from('petugas_bmd').select('*').order('created_at', { ascending: false }),
+          supabase.from('aset_bmd').select('*').order('updated_at', { ascending: false }),
+          supabase.from('log_inventarisasi').select('*').order('created_at', { ascending: false }),
+          supabase.from('mutasi_bmd').select('*').order('created_at', { ascending: false })
+        ]);
+
+        state.master_opd = opdRes.data || [];
+        state.petugas_bmd = ptgRes.data || [];
+        state.aset_bmd = asetRes.data || [];
+        state.log_inventarisasi = logRes.data || [];
+        state.mutasi_bmd = mutRes.data || [];
+      } catch (err) {
+        showToast('Gagal memuat data dari Supabase: ' + err.message, 'error');
+      }
+    }
+
+    // ========================================================================
+    // SISTEM HYBRID AUTHENTICATION
+    // ========================================================================
+    function switchAuthTab(tab) {
+      const btnPetugas = document.getElementById('tab-login-petugas');
+      const btnAdmin = document.getElementById('tab-login-admin');
+      const formPetugas = document.getElementById('form-login-petugas');
+      const formAdmin = document.getElementById('form-login-admin');
+
+      if (tab === 'petugas') {
+        btnPetugas.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5';
+        btnAdmin.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5';
+        formPetugas.classList.remove('hidden');
+        formAdmin.classList.add('hidden');
+      } else {
+        btnAdmin.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all nav-pill-3d-active flex items-center justify-center gap-1.5';
+        btnPetugas.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5';
+        formAdmin.classList.remove('hidden');
+        formPetugas.classList.add('hidden');
+      }
+    }
+
+    // 1. Login Petugas OPD (Query ke Tabel `petugas_bmd`)
+    async function handleLoginPetugas(e) {
+      e.preventDefault();
+      const nip = document.getElementById('login-petugas-nip').value.trim();
+      const pass = document.getElementById('login-petugas-pass').value.trim();
+
+      if (IS_PREVIEW) {
+        const found = state.petugas_bmd.find(
+          p => p.nip_username === nip && p.password === pass && p.status_aktif
+        );
+        if (!found) {
+          showToast('NIP/Username atau kata sandi tidak cocok! Gunakan tombol Quick Login di atas untuk demo.', 'error');
+          return;
+        }
+        enterDashboard({
+          id: found.id,
+          name: found.nama_lengkap,
+          role: 'petugas',
+          opd_id: found.opd_id,
+          jabatan: found.jabatan
+        });
+        return;
+      }
+
+      // Mode Produksi (IS_PREVIEW === false): Validasi langsung ke tabel `petugas_bmd` di Supabase
+      const { data, error } = await supabase
+        .from('petugas_bmd')
+        .select('*')
+        .eq('nip_username', nip)
+        .eq('password', pass)
+        .eq('status_aktif', true)
+        .maybeSingle();
+
+      if (error || !data) {
+        showToast('Kredensial Petugas tidak valid atau akun non-aktif.', 'error');
+        return;
+      }
+
+      localStorage.setItem('simbmd_petugas_session', JSON.stringify(data));
+      await loadSupabaseData();
+      enterDashboard({
+        id: data.id,
+        name: data.nama_lengkap,
+        role: 'petugas',
+        opd_id: data.opd_id,
+        jabatan: data.jabatan
+      });
+    }
+
+    // 2. Login Admin BPKAD (Supabase Auth `signInWithPassword`)
+    async function handleLoginAdmin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-admin-email').value.trim();
+      const password = document.getElementById('login-admin-pass').value.trim();
+
+      if (IS_PREVIEW) {
+        enterDashboard({
+          id: 'admin-preview',
+          name: email.split('@')[0] || 'Admin BPKAD',
+          role: 'admin',
+          opd_id: null,
+          jabatan: 'Administrator Utama BPKAD'
+        });
+        return;
+      }
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error || !data.user) {
+        showToast('Gagal login Supabase Auth: ' + (error?.message || 'Kredensial salah'), 'error');
+        return;
+      }
+
+      await loadSupabaseData();
+      enterDashboard({
+        id: data.user.id,
+        name: data.user.email.split('@')[0],
+        role: 'admin',
+        opd_id: null,
+        jabatan: 'Admin BPKAD (Supabase Auth)'
+      });
+    }
+
+    // Pintasan Quick Login (HANYA bekerja saat IS_PREVIEW === true)
+    function quickLogin(role) {
+      if (!IS_PREVIEW) return;
+      if (role === 'admin') {
+        enterDashboard({
+          id: 'admin-demo',
+          name: 'Alex Morgan (BPKAD)',
+          role: 'admin',
+          opd_id: null,
+          jabatan: 'Kepala Bidang Aset BPKAD'
+        });
+      } else {
+        const ptg = state.petugas_bmd[0];
+        enterDashboard({
+          id: ptg?.id || 'ptg-demo',
+          name: ptg?.nama_lengkap || 'Budi Santoso, S.Tr.Ak',
+          role: 'petugas',
+          opd_id: ptg?.opd_id || 'opd-1',
+          jabatan: ptg?.jabatan || 'Pengurus Barang OPD'
+        });
+      }
+    }
+
+    function enterDashboard(userObj) {
+      state.currentUser = userObj;
+      document.getElementById('auth-screen').classList.add('hidden');
+      document.getElementById('main-shell').classList.remove('hidden');
+
+      // Update Header Info
+      const initials = userObj.name
+        .split(' ')
+        .map(w => w[0])
+        .join('')
+        .substring(0, 2)
+        .toUpperCase();
+      document.getElementById('user-avatar-box').textContent = initials;
+      document.getElementById('user-display-name').textContent = userObj.name;
+      document.getElementById('user-display-role').textContent = userObj.jabatan;
+
+      // Greeting Hero
+      const hour = new Date().getHours();
+      const waktu = hour < 11 ? 'Selamat Pagi' : hour < 15 ? 'Selamat Siang' : hour < 18 ? 'Selamat Sore' : 'Selamat Malam';
+      document.getElementById('hero-greeting').textContent = `${waktu}, ${userObj.name.split(' ')[0]}! 👋`;
+
+      // Hak Akses Menu Master OPD & Petugas (Hanya Admin)
+      const adminGroup = document.getElementById('sidebar-admin-group');
+      const mobileOpdBtn = document.getElementById('mobile-nav-opd');
+      if (userObj.role === 'admin') {
+        adminGroup.classList.remove('hidden');
+        mobileOpdBtn.classList.remove('hidden');
+      } else {
+        adminGroup.classList.add('hidden');
+        mobileOpdBtn.classList.add('hidden');
+        if (state.activeView === 'opd') state.activeView = 'dashboard';
+      }
+
+      navigate(state.activeView);
+      showToast(`Selamat datang, ${userObj.name}!`, 'info');
+    }
+
+    async function handleLogout() {
+      if (!IS_PREVIEW && supabase) {
+        await supabase.auth.signOut();
+        localStorage.removeItem('simbmd_petugas_session');
+      }
+      state.currentUser = null;
+      document.getElementById('main-shell').classList.add('hidden');
+      document.getElementById('auth-screen').classList.remove('hidden');
+      showToast('Anda telah keluar dari sesi aplikasi.', 'info');
+    }
+
+    // ========================================================================
+    // NAVIGASI & RENDERING KOMPONEN 3D
+    // ========================================================================
+    function navigate(viewName) {
+      if (viewName === 'opd' && state.currentUser?.role !== 'admin') {
+        showToast('Akses terbatas khusus Administrator BPKAD!', 'error');
+        return;
+      }
+      state.activeView = viewName;
+
+      const views = ['dashboard', 'kib', 'sensus', 'mutasi', 'opd'];
+      views.forEach(v => {
+        const sec = document.getElementById(`view-${v}`);
+        if (sec) sec.classList.toggle('hidden', v !== viewName);
+      });
+
+      // Highlight Tombol Navigasi 3D
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const target = btn.getAttribute('data-nav');
+        if (target === viewName) {
+          btn.classList.remove('nav-pill-3d-inactive');
+          btn.classList.add('nav-pill-3d-active');
+        } else {
+          btn.classList.remove('nav-pill-3d-active');
+          btn.classList.add('nav-pill-3d-inactive');
+        }
+      });
+
+      renderAll();
+    }
+
+    function openKibCategory(categoryName) {
+      state.kibCategoryFilter = categoryName;
+      navigate('kib');
+      updateKibPillsUI();
+    }
+
+    function setKibFilter(categoryName) {
+      state.kibCategoryFilter = categoryName;
+      updateKibPillsUI();
+      renderKibView();
+    }
+
+    function updateKibPillsUI() {
+      document.querySelectorAll('.kib-pill').forEach(btn => {
+        const val = btn.getAttribute('data-kib');
+        if (val === state.kibCategoryFilter) {
+          btn.className = 'kib-pill btn-3d-primary px-3.5 py-1.5 text-xs';
+        } else {
+          btn.className = 'kib-pill btn-3d-white px-3.5 py-1.5 text-xs';
+        }
+      });
+    }
+
+    function toggleSidebar() {
+      const sb = document.getElementById('desktop-sidebar');
+      sb.classList.toggle('lg:flex');
+      sb.classList.toggle('lg:hidden');
+    }
+
+    function handleGlobalSearch(q) {
+      state.globalSearchQuery = q.toLowerCase().trim();
+      renderAll();
+    }
+
+    // Filter aset berdasarkan Tahun Global & OPD User (jika login sebagai petugas OPD)
+    function getFilteredAsetList() {
+      const tahunFilter = document.getElementById('filter-tahun-global')?.value || 'ALL';
+      return state.aset_bmd.filter(a => {
+        // Jika petugas OPD, prioritaskan tampilan OPD-nya atau semua jika admin
+        if (tahunFilter !== 'ALL') {
+          if (tahunFilter === '2023') {
+            if (Number(a.tahun_perolehan) > 2023) return false;
+          } else if (String(a.tahun_perolehan) !== tahunFilter) {
+            return false;
+          }
+        }
+        if (state.globalSearchQuery) {
+          const hay = `${a.nama_barang} ${a.kode_barang} ${a.merk_tipe} ${a.ruangan_lokasi} ${a.pemegang_barang}`.toLowerCase();
+          if (!hay.includes(state.globalSearchQuery)) return false;
+        }
+        return true;
+      });
+    }
+
+    function getOpdName(opdId) {
+      const found = state.master_opd.find(o => o.id === opdId);
+      return found ? found.nama_opd : 'OPD Umum Daerah';
+    }
+
+    function renderAll() {
+      // Update counter di sidebar & lonceng
+      document.getElementById('sidebar-count-aset').textContent = state.aset_bmd.length;
+      document.getElementById('sidebar-count-sensus').textContent = state.log_inventarisasi.length;
+      document.getElementById('sidebar-count-mutasi').textContent = state.mutasi_bmd.length;
+
+      const pendingMutasi = state.mutasi_bmd.filter(m => m.status_persetujuan === 'Menunggu').length;
+      document.getElementById('notif-badge-count').textContent = pendingMutasi;
+
+      populateSelectOptions();
+      renderDashboardView();
+      renderKibView();
+      renderSensusView();
+      renderMutasiView();
+      renderOpdAndPetugasView();
+      lucide.createIcons();
+    }
+
+    function populateSelectOptions() {
+      // Populate OPD Selectors
+      const opdOptionsWithAll = `<option value="ALL">Semua Unit OPD</option>` +
+        state.master_opd.map(o => `<option value="${o.id}">${o.kode_opd} - ${o.nama_opd}</option>`).join('');
+      const opdFilterEl = document.getElementById('kib-filter-opd');
+      if (opdFilterEl) {
+        const currentVal = opdFilterEl.value;
+        opdFilterEl.innerHTML = opdOptionsWithAll;
+        if (currentVal) opdFilterEl.value = currentVal;
+      }
+
+      const opdOnlyOptions = state.master_opd.length
+        ? state.master_opd.map(o => `<option value="${o.id}">${o.nama_opd}</option>`).join('')
+        : `<option value="">-- Belum Ada OPD --</option>`;
+
+      const asetOpdSelect = document.getElementById('aset-opd');
+      if (asetOpdSelect) asetOpdSelect.innerHTML = opdOnlyOptions;
+
+      const petugasOpdSelect = document.getElementById('petugas-opd');
+      if (petugasOpdSelect) petugasOpdSelect.innerHTML = opdOnlyOptions;
+
+      // Populate Aset Selectors for Sensus & Mutasi
+      const asetOptions = state.aset_bmd.length
+        ? state.aset_bmd.map(a => `<option value="${a.id}">[${a.kode_barang} #${a.nup}] ${a.nama_barang}</option>`).join('')
+        : `<option value="">-- Belum Ada Data Aset BMD --</option>`;
+
+      const sensusAsetEl = document.getElementById('sensus-aset-id');
+      if (sensusAsetEl) sensusAsetEl.innerHTML = asetOptions;
+
+      const mutasiAsetEl = document.getElementById('mutasi-aset-id');
+      if (mutasiAsetEl) mutasiAsetEl.innerHTML = asetOptions;
+    }
+
+    // ========================================================================
+    // RENDER VIEW 1: DASHBOARD EKSEKUTIF + CHARTS 3D
+    // ========================================================================
+    function renderDashboardView() {
+      const list = getFilteredAsetList();
+      const totalAset = list.length;
+      const adaFisik = list.filter(a => a.status_keberadaan === 'Ada').length;
+      const hilangFisik = totalAset - adaFisik;
+
+      const kondisiBaik = list.filter(a => a.kondisi === 'Baik').length;
+      const kondisiRusak = totalAset - kondisiBaik;
+
+      const totalNilai = list.reduce((acc, item) => acc + (Number(item.nilai_perolehan) || 0), 0);
+      const healthRate = totalAset > 0 ? Math.round((kondisiBaik / totalAset) * 100) : 100;
+
+      document.getElementById('kpi-total-aset').textContent = totalAset;
+      document.getElementById('kpi-aset-ada').textContent = `${adaFisik} Ada Fisik`;
+      document.getElementById('kpi-aset-hilang').textContent = `${hilangFisik} Tidak Ditemukan`;
+
+      document.getElementById('kpi-total-sensus').textContent = state.log_inventarisasi.length;
+      document.getElementById('kpi-kondisi-baik').textContent = `${kondisiBaik} Kondisi Baik`;
+      document.getElementById('kpi-kondisi-rusak').textContent = `${kondisiRusak} Rusak`;
+
+      document.getElementById('kpi-total-nilai').textContent = formatRupiahSingkat(totalNilai);
+      document.getElementById('kpi-health-rate').textContent = `${healthRate}%`;
+      document.getElementById('kpi-opd-count').textContent = `${state.master_opd.length} Unit OPD`;
+      document.getElementById('kpi-mutasi-pending').textContent = `${state.mutasi_bmd.length} Log Mutasi`;
+
+      renderAnalyticsCharts(list);
+      renderOpdProgressBars(list);
+      renderDashboardTable();
+    }
+
+    function renderAnalyticsCharts(list) {
+      // 1. Area Line Chart: Distribusi Kategori KIB A - E
+      const kibLabels = ['KIB A', 'KIB B', 'KIB C', 'KIB D', 'KIB E'];
+      const kibCounts = [
+        list.filter(a => a.kategori_kib?.startsWith('KIB A')).length,
+        list.filter(a => a.kategori_kib?.startsWith('KIB B')).length,
+        list.filter(a => a.kategori_kib?.startsWith('KIB C')).length,
+        list.filter(a => a.kategori_kib?.startsWith('KIB D')).length,
+        list.filter(a => a.kategori_kib?.startsWith('KIB E')).length
+      ];
+
+      const ctxLine = document.getElementById('chart-kib-overview');
+      if (ctxLine) {
+        if (state.charts.kibOverview) state.charts.kibOverview.destroy();
+        const gradient = ctxLine.getContext('2d').createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.38)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0.01)');
+
+        state.charts.kibOverview = new Chart(ctxLine, {
+          type: 'line',
+          data: {
+            labels: kibLabels,
+            datasets: [{
+              label: 'Jumlah Item BMD',
+              data: kibCounts,
+              borderColor: '#6366F1',
+              backgroundColor: gradient,
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: '#FFFFFF',
+              pointBorderColor: '#4F46E5',
+              pointBorderWidth: 3,
+              pointRadius: 5,
+              pointHoverRadius: 7
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { family: 'Plus Jakarta Sans', weight: '600', size: 11 } },
+                grid: { color: '#F1F5F9' }
+              },
+              x: {
+                ticks: { font: { family: 'Plus Jakarta Sans', weight: '700', size: 11 } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. 3D Donut Chart: Kondisi Aset
+      const baik = list.filter(a => a.kondisi === 'Baik').length;
+      const ringan = list.filter(a => a.kondisi === 'Rusak Ringan').length;
+      const berat = list.filter(a => a.kondisi === 'Rusak Berat').length;
+      const total = list.length;
+
+      document.getElementById('donut-center-number').textContent = total;
+
+      const ctxDonut = document.getElementById('chart-kondisi-donut');
+      if (ctxDonut) {
+        if (state.charts.kondisiDonut) state.charts.kondisiDonut.destroy();
+        state.charts.kondisiDonut = new Chart(ctxDonut, {
+          type: 'doughnut',
+          data: {
+            labels: ['Baik', 'Rusak Ringan', 'Rusak Berat'],
+            datasets: [{
+              data: total > 0 ? [baik, ringan, berat] : [1, 0, 0],
+              backgroundColor: ['#6366F1', '#F59E0B', '#F43F5E'],
+              borderWidth: 3,
+              borderColor: '#FFFFFF',
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+
+      // Render Custom Legend di Samping Donut
+      const pct = val => (total > 0 ? Math.round((val / total) * 100) : 0);
+      document.getElementById('donut-legend-box').innerHTML = `
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+          <span class="flex items-center gap-2 font-bold text-slate-700">
+            <span class="w-3 h-3 rounded-full bg-indigo-500 shadow"></span>
+            Baik
+          </span>
+          <span class="font-extrabold text-slate-900">${baik} <span class="text-slate-400 font-semibold">(${pct(baik)}%)</span></span>
+        </div>
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+          <span class="flex items-center gap-2 font-bold text-slate-700">
+            <span class="w-3 h-3 rounded-full bg-amber-500 shadow"></span>
+            Rusak Ringan
+          </span>
+          <span class="font-extrabold text-slate-900">${ringan} <span class="text-slate-400 font-semibold">(${pct(ringan)}%)</span></span>
+        </div>
+        <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100">
+          <span class="flex items-center gap-2 font-bold text-slate-700">
+            <span class="w-3 h-3 rounded-full bg-rose-500 shadow"></span>
+            Rusak Berat
+          </span>
+          <span class="font-extrabold text-slate-900">${berat} <span class="text-slate-400 font-semibold">(${pct(berat)}%)</span></span>
+        </div>
+      `;
+    }
+
+    function renderOpdProgressBars(list) {
+      const container = document.getElementById('opd-progress-list');
+      if (!state.master_opd.length) {
+        container.innerHTML = `<div class="text-center py-8 text-xs font-semibold text-slate-400">Belum ada data OPD terdaftar.</div>`;
+        return;
+      }
+
+      const colors = [
+        'from-indigo-500 to-purple-600',
+        'from-blue-500 to-cyan-500',
+        'from-amber-500 to-orange-500',
+        'from-emerald-500 to-teal-500'
+      ];
+
+      const totalNilaiAll = list.reduce((s, a) => s + (Number(a.nilai_perolehan) || 0), 0) || 1;
+
+      container.innerHTML = state.master_opd.slice(0, 4).map((opd, idx) => {
+        const asetOpd = list.filter(a => a.opd_id === opd.id);
+        const nilaiOpd = asetOpd.reduce((s, a) => s + (Number(a.nilai_perolehan) || 0), 0);
+        const percent = Math.min(100, Math.max(8, Math.round((nilaiOpd / totalNilaiAll) * 100)));
+        const initials = opd.nama_opd.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+
+        return `
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-gradient-to-tr ${colors[idx % colors.length]} text-white font-extrabold text-xs flex items-center justify-center shadow border-2 border-white flex-shrink-0">
+              ${initials}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <span class="font-extrabold text-slate-800 truncate">${opd.nama_opd}</span>
+                <span class="font-extrabold text-slate-900 ml-2 flex-shrink-0">${asetOpd.length} Aset (${formatRupiahSingkat(nilaiOpd)})</span>
+              </div>
+              <div class="progress-track-3d h-2.5 w-full">
+                <div class="progress-bar-3d h-full bg-gradient-to-r ${colors[idx % colors.length]}" style="width: ${asetOpd.length ? percent : 0}%"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterDashboardTable(val) {
+      state.dashboardSearchQuery = val.toLowerCase().trim();
+      renderDashboardTable();
+      lucide.createIcons();
+    }
+
+    function renderDashboardTable() {
+      const tbody = document.getElementById('dashboard-table-body');
+      const kondisiFilter = document.getElementById('dash-filter-kondisi')?.value || 'ALL';
+
+      let rows = getFilteredAsetList().filter(a => {
+        if (kondisiFilter !== 'ALL' && a.kondisi !== kondisiFilter) return false;
+        if (state.dashboardSearchQuery) {
+          const hay = `${a.nama_barang} ${a.kode_barang} ${a.merk_tipe}`.toLowerCase();
+          if (!hay.includes(state.dashboardSearchQuery)) return false;
+        }
+        return true;
+      });
+
+      if (!rows.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-10 text-center text-xs font-bold text-slate-400">
+              Belum ada data aset BMD yang sesuai filter. Klik "+ Tambah Aset BMD" untuk menambahkan data baru.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = rows.map((a, idx) => {
+        const iconColors = ['icon-3d-purple', 'icon-3d-blue', 'icon-3d-emerald', 'icon-3d-amber'];
+        const hasLog = state.log_inventarisasi.some(l => l.aset_id === a.id);
+        const progressPct = hasLog ? 100 : 50;
+        const progressColor = hasLog ? 'bg-emerald-500' : 'bg-indigo-500';
+
+        const kondisiBadge = a.kondisi === 'Baik'
+          ? 'bg-emerald-100 text-emerald-700'
+          : a.kondisi === 'Rusak Ringan'
+          ? 'bg-amber-100 text-amber-700'
+          : 'bg-rose-100 text-rose-700';
+
+        const keberadaanBadge = a.status_keberadaan === 'Ada'
+          ? 'bg-blue-100 text-blue-700'
+          : 'bg-rose-100 text-rose-700';
+
+        return `
+          <tr class="tr-3d-row">
+            <td class="py-3.5 pl-2 pr-3">
+              <div class="flex items-center gap-3">
+                <div class="icon-box-3d ${iconColors[idx % iconColors.length]} w-9 h-9 rounded-xl">
+                  <i data-lucide="box" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <p class="font-extrabold text-slate-900 leading-snug">${a.nama_barang}</p>
+                  <p class="text-[11px] font-mono font-semibold text-slate-400">${a.kode_barang} • NUP #${a.nup}</p>
+                </div>
+              </div>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="font-bold text-slate-700 block">${getOpdName(a.opd_id)}</span>
+              <span class="text-[11px] text-slate-400 font-medium">${a.ruangan_lokasi}</span>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="font-extrabold text-slate-900 block">${formatRupiah(a.nilai_perolehan)}</span>
+              <span class="text-[11px] text-slate-400 font-semibold">Tahun ${a.tahun_perolehan}</span>
+            </td>
+            <td class="py-3.5 pr-3 w-36">
+              <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-700 mb-1">
+                <span>${progressPct}%</span>
+                <span class="text-slate-400">${hasLog ? 'Terverifikasi' : 'Terdaftar'}</span>
+              </div>
+              <div class="progress-track-3d h-2 w-full">
+                <div class="progress-bar-3d h-full ${progressColor}" style="width: ${progressPct}%"></div>
+              </div>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d ${kondisiBadge}">${a.kondisi}</span>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d ${keberadaanBadge}">${a.status_keberadaan}</span>
+            </td>
+            <td class="py-3.5 pr-2 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                <button onclick="window.app.showQrLabel('${a.id}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Lihat & Cetak QR Label">
+                  <i data-lucide="eye" class="w-4 h-4 text-indigo-600"></i>
+                </button>
+                <button onclick="window.app.openModalAset('${a.id}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Edit Aset">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-600"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ========================================================================
+    // RENDER VIEW 2: DATA MASTER ASET (KIB)
+    // ========================================================================
+    function renderKibView() {
+      const tbody = document.getElementById('kib-table-body');
+      const opdFilter = document.getElementById('kib-filter-opd')?.value || 'ALL';
+
+      const rows = getFilteredAsetList().filter(a => {
+        if (state.kibCategoryFilter !== 'ALL' && a.kategori_kib !== state.kibCategoryFilter) return false;
+        if (opdFilter !== 'ALL' && a.opd_id !== opdFilter) return false;
+        return true;
+      });
+
+      if (!rows.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-xs font-bold text-slate-400">
+              Tidak ada item aset pada kategori KIB ini. Gunakan tombol "+ Tambah Aset Baru" di kanan atas.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(a => {
+        const kondisiBadge = a.kondisi === 'Baik'
+          ? 'bg-emerald-100 text-emerald-700'
+          : a.kondisi === 'Rusak Ringan'
+          ? 'bg-amber-100 text-amber-700'
+          : 'bg-rose-100 text-rose-700';
+
+        return `
+          <tr class="tr-3d-row">
+            <td class="py-3.5 pl-2 pr-3">
+              <p class="font-extrabold text-slate-900">${a.nama_barang}</p>
+              <p class="text-[11px] font-mono font-bold text-indigo-600">${a.kode_barang} (NUP #${a.nup})</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d bg-indigo-50 text-indigo-700 mb-1">${a.kategori_kib}</span>
+              <p class="text-xs font-semibold text-slate-600">${a.merk_tipe}</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <p class="font-bold text-slate-800">${getOpdName(a.opd_id)}</p>
+              <p class="text-[11px] text-slate-500">Ruang: ${a.ruangan_lokasi} • Pemegang: ${a.pemegang_barang}</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <p class="font-extrabold text-slate-900">${formatRupiah(a.nilai_perolehan)}</p>
+              <p class="text-[11px] text-slate-400 font-bold">Perolehan ${a.tahun_perolehan}</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <div class="flex flex-col items-start gap-1">
+                <span class="badge-3d ${kondisiBadge}">${a.kondisi}</span>
+                <span class="text-[11px] font-bold text-slate-500">Fisik: ${a.status_keberadaan}</span>
+              </div>
+            </td>
+            <td class="py-3.5 pr-2 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                <button onclick="window.app.showQrLabel('${a.id}')" class="btn-3d-white px-2.5 py-1.5 text-xs flex items-center gap-1" title="Cetak QR">
+                  <i data-lucide="qr-code" class="w-3.5 h-3.5 text-indigo-600"></i>
+                  <span>QR</span>
+                </button>
+                <button onclick="window.app.openModalAset('${a.id}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Edit">
+                  <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-700"></i>
+                </button>
+                <button onclick="window.app.confirmDelete('aset_bmd', '${a.id}', '${a.nama_barang.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Hapus">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ========================================================================
+    // RENDER VIEW 3: SENSUS & CEK FISIK (`log_inventarisasi`)
+    // ========================================================================
+    function renderSensusView() {
+      const tbody = document.getElementById('sensus-table-body');
+      if (!state.log_inventarisasi.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-12 text-center text-xs font-bold text-slate-400">
+              Belum ada riwayat pemeriksaan fisik (BAP Sensus). Klik "Input BAP Cek Fisik Baru" untuk mencatat hasil sensus.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = state.log_inventarisasi.map(l => {
+        const aset = state.aset_bmd.find(a => a.id === l.aset_id);
+        const namaAset = aset ? aset.nama_barang : 'Aset Telah Dihapus';
+        const kodeAset = aset ? `${aset.kode_barang} #${aset.nup}` : '-';
+
+        return `
+          <tr class="tr-3d-row">
+            <td class="py-3.5 pl-2 pr-3">
+              <p class="font-extrabold text-slate-900">${l.nomor_bap}</p>
+              <p class="text-[11px] font-semibold text-slate-400">${l.tanggal_cek}</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <p class="font-bold text-slate-800">${namaAset}</p>
+              <p class="text-[11px] font-mono text-slate-400">${kodeAset}</p>
+            </td>
+            <td class="py-3.5 pr-3 font-bold text-slate-700">${l.petugas_nama}</td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d bg-slate-100 text-slate-600">${l.kondisi_awal}</span>
+              <span class="mx-1 text-slate-400">→</span>
+              <span class="badge-3d bg-indigo-100 text-indigo-700">${l.kondisi_baru}</span>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d ${l.keberadaan === 'Ada' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${l.keberadaan}</span>
+            </td>
+            <td class="py-3.5 pr-3 text-xs text-slate-600 max-w-xs">${l.catatan_lapangan}</td>
+            <td class="py-3.5 pr-2 text-right">
+              <button onclick="window.app.confirmDelete('log_inventarisasi', '${l.id}', '${l.nomor_bap}')" class="btn-3d-white w-8 h-8 inline-flex items-center justify-center" title="Hapus Log">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ========================================================================
+    // RENDER VIEW 4: MUTASI & PENGHAPUSAN (`mutasi_bmd`)
+    // ========================================================================
+    function renderMutasiView() {
+      const tbody = document.getElementById('mutasi-table-body');
+      if (!state.mutasi_bmd.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-12 text-center text-xs font-bold text-slate-400">
+              Belum ada pengajuan mutasi atau penghapusan BMD.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      const isAdmin = state.currentUser?.role === 'admin';
+
+      tbody.innerHTML = state.mutasi_bmd.map(m => {
+        const aset = state.aset_bmd.find(a => a.id === m.aset_id);
+        const statusColor = m.status_persetujuan === 'Disetujui'
+          ? 'bg-emerald-100 text-emerald-700'
+          : m.status_persetujuan === 'Ditolak'
+          ? 'bg-rose-100 text-rose-700'
+          : 'bg-amber-100 text-amber-700';
+
+        return `
+          <tr class="tr-3d-row">
+            <td class="py-3.5 pl-2 pr-3">
+              <p class="font-extrabold text-slate-900">${m.nomor_sk}</p>
+              <p class="text-[11px] text-slate-400 font-semibold">${m.tanggal_mutasi}</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <p class="font-bold text-slate-800">${aset ? aset.nama_barang : 'Aset BMD'}</p>
+              <p class="text-[11px] font-mono text-slate-400">${aset ? aset.kode_barang : '-'}</p>
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d bg-purple-100 text-purple-700">${m.jenis_mutasi}</span>
+            </td>
+            <td class="py-3.5 pr-3 text-xs font-bold text-slate-700">
+              ${m.opd_asal} <span class="text-indigo-500 font-extrabold">→</span> ${m.opd_tujuan}
+            </td>
+            <td class="py-3.5 pr-3">
+              <span class="badge-3d ${statusColor}">${m.status_persetujuan}</span>
+            </td>
+            <td class="py-3.5 pr-2 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                ${isAdmin && m.status_persetujuan === 'Menunggu' ? `
+                  <button onclick="window.app.updateStatusMutasi('${m.id}', 'Disetujui')" class="btn-3d-emerald px-2.5 py-1 text-[11px]" title="Setujui">Setujui</button>
+                  <button onclick="window.app.updateStatusMutasi('${m.id}', 'Ditolak')" class="btn-3d-coral px-2.5 py-1 text-[11px]" title="Tolak">Tolak</button>
+                ` : ''}
+                <button onclick="window.app.confirmDelete('mutasi_bmd', '${m.id}', '${m.nomor_sk}')" class="btn-3d-white w-8 h-8 flex items-center justify-center" title="Hapus">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ========================================================================
+    // RENDER VIEW 5: MASTER OPD & PETUGAS (`master_opd` & `petugas_bmd`)
+    // ========================================================================
+    function renderOpdAndPetugasView() {
+      const opdBody = document.getElementById('opd-table-body');
+      const ptgBody = document.getElementById('petugas-table-body');
+
+      if (!state.master_opd.length) {
+        opdBody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400 font-bold">Belum ada data OPD.</td></tr>`;
+      } else {
+        opdBody.innerHTML = state.master_opd.map(o => `
+          <tr class="tr-3d-row">
+            <td class="py-3 pr-2">
+              <p class="font-extrabold text-slate-900">${o.nama_opd}</p>
+              <p class="text-[11px] font-mono text-indigo-600 font-bold">Kode: ${o.kode_opd}</p>
+            </td>
+            <td class="py-3 pr-2 font-semibold text-slate-700">${o.kepala_opd}</td>
+            <td class="py-3 text-right">
+              <button onclick="window.app.confirmDelete('master_opd', '${o.id}', '${o.nama_opd.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 inline-flex items-center justify-center">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      if (!state.petugas_bmd.length) {
+        ptgBody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400 font-bold">Belum ada akun petugas.</td></tr>`;
+      } else {
+        ptgBody.innerHTML = state.petugas_bmd.map(p => `
+          <tr class="tr-3d-row">
+            <td class="py-3 pr-2">
+              <p class="font-extrabold text-slate-900">${p.nama_lengkap}</p>
+              <p class="text-[11px] font-mono text-slate-500">NIP/User: ${p.nip_username} • Pass: <code class="bg-slate-100 px-1 rounded">${p.password}</code></p>
+            </td>
+            <td class="py-3 pr-2">
+              <p class="font-bold text-slate-700">${getOpdName(p.opd_id)}</p>
+              <p class="text-[11px] text-slate-400">${p.jabatan}</p>
+            </td>
+            <td class="py-3 pr-2">
+              <span class="badge-3d ${p.status_aktif ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
+                ${p.status_aktif ? 'Aktif' : 'Non-Aktif'}
+              </span>
+            </td>
+            <td class="py-3 text-right">
+              <button onclick="window.app.confirmDelete('petugas_bmd', '${p.id}', '${p.nama_lengkap.replace(/'/g, '')}')" class="btn-3d-white w-8 h-8 inline-flex items-center justify-center">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-600"></i>
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // ========================================================================
+    // OPERASI CRUD (MENDUKUNG MODE PREVIEW & SUPABASE PRODUCTION)
+    // ========================================================================
+    function openModalAset(editId = null) {
+      populateSelectOptions();
+      const form = document.getElementById('form-aset');
+      form.reset();
+      document.getElementById('aset-id').value = '';
+
+      if (editId) {
+        const item = state.aset_bmd.find(a => a.id === editId);
+        if (item) {
+          document.getElementById('modal-aset-title').textContent = 'Edit Data Aset BMD';
+          document.getElementById('aset-id').value = item.id;
+          document.getElementById('aset-kode').value = item.kode_barang;
+          document.getElementById('aset-nup').value = item.nup;
+          document.getElementById('aset-kib').value = item.kategori_kib;
+          document.getElementById('aset-nama').value = item.nama_barang;
+          document.getElementById('aset-merk').value = item.merk_tipe;
+          document.getElementById('aset-tahun').value = item.tahun_perolehan;
+          document.getElementById('aset-nilai').value = item.nilai_perolehan;
+          document.getElementById('aset-opd').value = item.opd_id;
+          document.getElementById('aset-kondisi').value = item.kondisi;
+          document.getElementById('aset-keberadaan').value = item.status_keberadaan;
+          document.getElementById('aset-ruangan').value = item.ruangan_lokasi;
+          document.getElementById('aset-pemegang').value = item.pemegang_barang;
+          document.getElementById('aset-ket').value = item.keterangan || '';
+        }
+      } else {
+        document.getElementById('modal-aset-title').textContent = 'Tambah Aset BMD Baru';
+        document.getElementById('aset-nup').value = state.aset_bmd.length + 1;
+      }
+
+      document.getElementById('modal-aset').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    async function saveAset(e) {
+      e.preventDefault();
+      const editId = document.getElementById('aset-id').value;
+      const payload = {
+        kode_barang: document.getElementById('aset-kode').value.trim(),
+        nup: Number(document.getElementById('aset-nup').value),
+        kategori_kib: document.getElementById('aset-kib').value,
+        nama_barang: document.getElementById('aset-nama').value.trim(),
+        merk_tipe: document.getElementById('aset-merk').value.trim(),
+        tahun_perolehan: Number(document.getElementById('aset-tahun').value),
+        nilai_perolehan: Number(document.getElementById('aset-nilai').value),
+        opd_id: document.getElementById('aset-opd').value,
+        kondisi: document.getElementById('aset-kondisi').value,
+        status_keberadaan: document.getElementById('aset-keberadaan').value,
+        ruangan_lokasi: document.getElementById('aset-ruangan').value.trim(),
+        pemegang_barang: document.getElementById('aset-pemegang').value.trim(),
+        keterangan: document.getElementById('aset-ket').value.trim(),
+        updated_at: new Date().toISOString()
+      };
+
+      if (IS_PREVIEW) {
+        if (editId) {
+          const idx = state.aset_bmd.findIndex(a => a.id === editId);
+          if (idx > -1) state.aset_bmd[idx] = { ...state.aset_bmd[idx], ...payload };
+          showToast('Data aset BMD berhasil diperbarui!');
+        } else {
+          state.aset_bmd.unshift({ id: 'ast-' + Date.now(), ...payload });
+          showToast('Aset BMD baru berhasil ditambahkan!');
+        }
+      } else {
+        if (editId) {
+          const { error } = await supabase.from('aset_bmd').update(payload).eq('id', editId);
+          if (error) return showToast('Gagal update: ' + error.message, 'error');
+          showToast('Data aset BMD diperbarui di Supabase!');
+        } else {
+          const { error } = await supabase.from('aset_bmd').insert([payload]);
+          if (error) return showToast('Gagal simpan: ' + error.message, 'error');
+          showToast('Aset BMD baru tersimpan ke Supabase!');
+        }
+        await loadSupabaseData();
+      }
+
+      closeModal('modal-aset');
+      renderAll();
+    }
+
+    function openModalSensus() {
+      populateSelectOptions();
+      document.getElementById('form-sensus').reset();
+      document.getElementById('sensus-tanggal').value = new Date().toISOString().split('T')[0];
+      document.getElementById('sensus-bap').value = `BAP/BMD/2026/00${state.log_inventarisasi.length + 1}`;
+      document.getElementById('sensus-petugas').value = state.currentUser?.name || '';
+      document.getElementById('modal-sensus').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    async function saveSensus(e) {
+      e.preventDefault();
+      const asetId = document.getElementById('sensus-aset-id').value;
+      const aset = state.aset_bmd.find(a => a.id === asetId);
+      if (!aset) return showToast('Pilih aset BMD terlebih dahulu!', 'error');
+
+      const kondisiBaru = document.getElementById('sensus-kondisi-baru').value;
+      const keberadaanBaru = document.getElementById('sensus-keberadaan').value;
+
+      const payload = {
+        aset_id: asetId,
+        nomor_bap: document.getElementById('sensus-bap').value.trim(),
+        tanggal_cek: document.getElementById('sensus-tanggal').value,
+        petugas_nama: document.getElementById('sensus-petugas').value.trim(),
+        kondisi_awal: aset.kondisi,
+        kondisi_baru: kondisiBaru,
+        keberadaan: keberadaanBaru,
+        catatan_lapangan: document.getElementById('sensus-catatan').value.trim()
+      };
+
+      if (IS_PREVIEW) {
+        state.log_inventarisasi.unshift({ id: 'log-' + Date.now(), ...payload });
+        aset.kondisi = kondisiBaru;
+        aset.status_keberadaan = keberadaanBaru;
+        showToast('BAP Sensus disimpan & kondisi master aset diperbarui!');
+      } else {
+        const { error } = await supabase.from('log_inventarisasi').insert([payload]);
+        if (error) return showToast('Gagal menyimpan BAP: ' + error.message, 'error');
+        await supabase
+          .from('aset_bmd')
+          .update({ kondisi: kondisiBaru, status_keberadaan: keberadaanBaru, updated_at: new Date().toISOString() })
+          .eq('id', asetId);
+        await loadSupabaseData();
+        showToast('BAP Sensus tersimpan ke Supabase!');
+      }
+
+      closeModal('modal-sensus');
+      renderAll();
+    }
+
+    function openModalMutasi() {
+      populateSelectOptions();
+      document.getElementById('form-mutasi').reset();
+      document.getElementById('mutasi-tanggal').value = new Date().toISOString().split('T')[0];
+      document.getElementById('mutasi-sk').value = `SK-MUT/BMD/2026/00${state.mutasi_bmd.length + 1}`;
+      document.getElementById('modal-mutasi').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    async function saveMutasi(e) {
+      e.preventDefault();
+      const payload = {
+        aset_id: document.getElementById('mutasi-aset-id').value,
+        jenis_mutasi: document.getElementById('mutasi-jenis').value,
+        tanggal_mutasi: document.getElementById('mutasi-tanggal').value,
+        opd_asal: document.getElementById('mutasi-asal').value.trim(),
+        opd_tujuan: document.getElementById('mutasi-tujuan').value.trim(),
+        nomor_sk: document.getElementById('mutasi-sk').value.trim(),
+        status_persetujuan: 'Menunggu'
+      };
+
+      if (IS_PREVIEW) {
+        state.mutasi_bmd.unshift({ id: 'mut-' + Date.now(), ...payload });
+        showToast('Pengajuan mutasi/penghapusan berhasil dikirim!');
+      } else {
+        const { error } = await supabase.from('mutasi_bmd').insert([payload]);
+        if (error) return showToast('Gagal simpan mutasi: ' + error.message, 'error');
+        await loadSupabaseData();
+        showToast('Pengajuan mutasi tersimpan di Supabase!');
+      }
+
+      closeModal('modal-mutasi');
+      renderAll();
+    }
+
+    async function updateStatusMutasi(mutasiId, statusBaru) {
+      if (IS_PREVIEW) {
+        const item = state.mutasi_bmd.find(m => m.id === mutasiId);
+        if (item) item.status_persetujuan = statusBaru;
+        showToast(`Status pengajuan diubah menjadi: ${statusBaru}`);
+      } else {
+        const { error } = await supabase
+          .from('mutasi_bmd')
+          .update({ status_persetujuan: statusBaru })
+          .eq('id', mutasiId);
+        if (error) return showToast('Gagal mengubah status: ' + error.message, 'error');
+        await loadSupabaseData();
+        showToast(`Pengajuan mutasi ${statusBaru}!`);
+      }
+      renderAll();
+    }
+
+    function openModalOpd() {
+      document.getElementById('form-opd').reset();
+      document.getElementById('modal-opd').classList.remove('hidden');
+    }
+
+    async function saveOpd(e) {
+      e.preventDefault();
+      const payload = {
+        kode_opd: document.getElementById('opd-kode').value.trim(),
+        nama_opd: document.getElementById('opd-nama').value.trim(),
+        kepala_opd: document.getElementById('opd-kepala').value.trim()
+      };
+
+      if (IS_PREVIEW) {
+        state.master_opd.push({ id: 'opd-' + Date.now(), ...payload });
+        showToast('Unit Kerja / OPD baru berhasil ditambahkan!');
+      } else {
+        const { error } = await supabase.from('master_opd').insert([payload]);
+        if (error) return showToast('Gagal menambah OPD: ' + error.message, 'error');
+        await loadSupabaseData();
+        showToast('OPD tersimpan ke Supabase!');
+      }
+
+      closeModal('modal-opd');
+      renderAll();
+    }
+
+    function openModalPetugas() {
+      populateSelectOptions();
+      document.getElementById('form-petugas').reset();
+      document.getElementById('modal-petugas').classList.remove('hidden');
+    }
+
+    async function savePetugas(e) {
+      e.preventDefault();
+      const payload = {
+        nip_username: document.getElementById('petugas-nip').value.trim(),
+        password: document.getElementById('petugas-password').value.trim(),
+        nama_lengkap: document.getElementById('petugas-nama').value.trim(),
+        jabatan: document.getElementById('petugas-jabatan').value.trim(),
+        opd_id: document.getElementById('petugas-opd').value,
+        status_aktif: true
+      };
+
+      if (IS_PREVIEW) {
+        state.petugas_bmd.unshift({ id: 'ptg-' + Date.now(), ...payload });
+        showToast('Akun Pengurus Barang berhasil ditambahkan!');
+      } else {
+        const { error } = await supabase.from('petugas_bmd').insert([payload]);
+        if (error) return showToast('Gagal membuat akun petugas: ' + error.message, 'error');
+        await loadSupabaseData();
+        showToast('Akun petugas tersimpan ke Supabase!');
+      }
+
+      closeModal('modal-petugas');
+      renderAll();
+    }
+
+    // Modal Konfirmasi Hapus Custom (Tanpa window.confirm)
+    function confirmDelete(tableName, id, label) {
+      document.getElementById('confirm-message').textContent = `Hapus permanen "${label}" dari daftar?`;
+      const modal = document.getElementById('modal-confirm');
+      modal.classList.remove('hidden');
+
+      const btnYes = document.getElementById('btn-confirm-yes');
+      btnYes.onclick = async () => {
+        if (IS_PREVIEW) {
+          state[tableName] = state[tableName].filter(item => item.id !== id);
+          showToast(`Data "${label}" berhasil dihapus.`);
+        } else {
+          const { error } = await supabase.from(tableName).delete().eq('id', id);
+          if (error) {
+            showToast('Gagal menghapus: ' + error.message, 'error');
+          } else {
+            await loadSupabaseData();
+            showToast(`Data "${label}" dihapus dari Supabase.`);
+          }
+        }
+        closeModal('modal-confirm');
+        renderAll();
+      };
+    }
+
+    // Modal Label QR Code Inventaris
+    function showQrLabel(asetId) {
+      const a = state.aset_bmd.find(item => item.id === asetId);
+      if (!a) return;
+
+      document.getElementById('qr-opd-name').textContent = getOpdName(a.opd_id);
+      document.getElementById('qr-tahun').textContent = a.tahun_perolehan;
+      document.getElementById('qr-kode-nup').textContent = `${a.kode_barang} • NUP #${a.nup}`;
+      document.getElementById('qr-nama-barang').textContent = a.nama_barang;
+      document.getElementById('qr-merk').textContent = a.merk_tipe;
+      document.getElementById('qr-kondisi').textContent = a.kondisi;
+      document.getElementById('qr-ruangan').textContent = a.ruangan_lokasi;
+      document.getElementById('qr-svg-box').innerHTML = generateQrSvg(`${a.kode_barang}-${a.nup}-${a.id}`);
+
+      document.getElementById('modal-qr').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId)?.classList.add('hidden');
+    }
+
+    // Export Laporan CSV
+    function exportCSV() {
+      const list = getFilteredAsetList();
+      if (!list.length) return showToast('Tidak ada data aset untuk diekspor.', 'error');
+
+      const headers = ['Kode Barang', 'NUP', 'Nama Barang', 'Kategori KIB', 'Merk/Tipe', 'Tahun', 'Nilai Perolehan', 'Kondisi', 'Keberadaan', 'OPD', 'Lokasi Ruangan', 'Pemegang'];
+      const csvRows = [
+        headers.join(','),
+        ...list.map(a => [
+          `"${a.kode_barang}"`,
+          a.nup,
+          `"${a.nama_barang.replace(/"/g, '""')}"`,
+          `"${a.kategori_kib}"`,
+          `"${a.merk_tipe.replace(/"/g, '""')}"`,
+          a.tahun_perolehan,
+          a.nilai_perolehan,
+          `"${a.kondisi}"`,
+          `"${a.status_keberadaan}"`,
+          `"${getOpdName(a.opd_id)}"`,
+          `"${a.ruangan_lokasi}"`,
+          `"${a.pemegang_barang}"`
+        ].join(','))
+      ];
+
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Laporan_Inventaris_BMD_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Laporan CSV Inventaris BMD berhasil diunduh!');
+    }
+
+    // Shortcut Keyboard Cmd/Ctrl + K untuk Fokus ke Search Bar 3D
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        document.getElementById('global-search-input')?.focus();
+      }
+    });
+
+    // ========================================================================
+    // INISIALISASI SAAT HALAMAN DIMUAT
+    // ========================================================================
+    async function bootstrapApp() {
+      lucide.createIcons();
+
+      if (IS_PREVIEW) {
+        // Tampilkan elemen Preview & isi 2 baris data dummy di memori lokal
+        document.getElementById('preview-banner').classList.remove('hidden');
+        document.getElementById('auth-preview-shortcuts').classList.remove('hidden');
+        initPreviewDummyData();
+        // Otomatis masuk ke dashboard dalam mode preview agar user langsung melihat desain 3D TaskHive
+        quickLogin('admin');
+      } else {
+        // Mode Produksi (IS_PREVIEW === false): Cek sesi aktif Supabase Auth atau sesi Petugas
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await loadSupabaseData();
+          enterDashboard({
+            id: session.user.id,
+            name: session.user.email.split('@')[0],
+            role: 'admin',
+            opd_id: null,
+            jabatan: 'Admin BPKAD'
+          });
+          return;
+        }
+
+        const savedPetugas = localStorage.getItem('simbmd_petugas_session');
+        if (savedPetugas) {
+          try {
+            const ptg = JSON.parse(savedPetugas);
+            await loadSupabaseData();
+            enterDashboard({
+              id: ptg.id,
+              name: ptg.nama_lengkap,
+              role: 'petugas',
+              opd_id: ptg.opd_id,
+              jabatan: ptg.jabatan
+            });
+          } catch (_) {
+            localStorage.removeItem('simbmd_petugas_session');
+          }
+        }
+      }
+    }
+
+    // Ekspos fungsi ke window.app untuk event handler inline HTML
+    window.app = {
+      switchAuthTab,
+      handleLoginPetugas,
+      handleLoginAdmin,
+      quickLogin,
+      handleLogout,
+      navigate,
+      openKibCategory,
+      setKibFilter,
+      toggleSidebar,
+      handleGlobalSearch,
+      filterDashboardTable,
+      renderDashboardTable,
+      renderKibView,
+      renderAll,
+      openModalAset,
+      saveAset,
+      openModalSensus,
+      saveSensus,
+      openModalMutasi,
+      saveMutasi,
+      updateStatusMutasi,
+      openModalOpd,
+      saveOpd,
+      openModalPetugas,
+      savePetugas,
+      confirmDelete,
+      showQrLabel,
+      closeModal,
+      exportCSV
+    };
+
+    window.addEventListener('DOMContentLoaded', bootstrapApp);
+  </script>
+</body>
+</html>
